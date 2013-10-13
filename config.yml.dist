@@ -20,8 +20,9 @@ production:
     machine_type:         n1-standard-1
     network:              default
     startup_script:       ./riclib/scripts/common-startup-script.sh
-    vm_prefix:            "test-gceprovisioner-"                      # set to empty string or delete if you don't want this feature.
+    vm_prefix:            "test-provisioner-"                         # set to empty string or delete if you don't want this feature.
     persistent_boot_disk: True                                        # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
+    image:                debian-7                                    # or "centos-6", "debian-6", ...
     tags:                                                             # Use this to set additional tags for every VM in project
     - foobar
     - useful_to_delete_me
@@ -29,6 +30,6 @@ production:
     email: YOUREMAIL_HERE@example.com
     name:  NAME SURNAME
   metadata:
-    # Use to set Project-wide metadata.
+    # Use to set Project-wide metadata. Dont use spaces in keys.
     password: Y0u11n3v3rGu3ss
     explaination: put here any key/value pair you want to assign to EVERY machine.

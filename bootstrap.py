@@ -38,7 +38,7 @@ def usage():
   print 'Projects: ', ', '.join(valid_projects())
   exit(1)
 
-def bootstrap_project(project_name, projects_dir=defaults['project_dir']):
+def bootstrap_project(project_name, config, projects_dir=defaults['project_dir']):
   '''Bootstraps a project.
 
   For a project to be valid, it has to have
@@ -48,7 +48,8 @@ def bootstrap_project(project_name, projects_dir=defaults['project_dir']):
     print "Invalid project: " , project_name
     exit(2)
   deb("Valid bootstrap project: %s" % project_name)
-  deb("Projects: " + ' '.join(valid_projects()) )
+  deb("Project Dir: %s" % projects_dir)
+  deb("Projects: " + ', '.join(valid_projects()) )
   bash_filename = projects_dir + project_name + ".bash"
   if os.path.exists(bash_filename):   # i.e.: 'projects/sakura.sh'
     # Execute the common before, the addon and the common after!
@@ -69,8 +70,8 @@ def main():
   config = riclib.config.getConfigYaml(defaults['yaml_file'])
   print "== Config =="
   print "Config: {}".format(config)
-  print "Config.project: {}".format(config['project'])
+  print "Config.project: {}".format(config['project_id'])
   print "Config.bucket:  {}".format(config['bucket'])
-  bootstrap_project(sys.argv[1])
+  bootstrap_project(sys.argv[1], config)
 
 main()

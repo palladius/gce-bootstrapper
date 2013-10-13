@@ -10,11 +10,11 @@ import re
 import yaml
 from util import deb
 
-default_ymlfile = '../config.yml' # here we are one dir below :)
+default_ymlfile = './config.yml' # here we are one dir below :)
 mandatory_fields = ['project_id', 'bucket', 'metadata', 'admin', 'defaults', 'dryrun']
 mandatory_secondary_fields = {
   'admin':    ['email', 'name'],
-  'defaults': ['zone', 'machine_type', 'network' ],
+  'defaults': ['zone', 'machine_type', 'network', 'image', 'vm_prefix', ],
 }
 
 def getConfigYaml(ymlfile=default_ymlfile):
@@ -63,7 +63,6 @@ def CheckValidity(config):
         return "'{}' mandatory key1 missing".format(i)
 
     for f1 in mandatory_secondary_fields.keys():
-        print "f1: {f1}"
         subkeys = mandatory_secondary_fields[f1]
         for f2 in subkeys:
             if not f2 in config[f1].keys():

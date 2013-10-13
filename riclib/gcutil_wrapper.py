@@ -77,6 +77,7 @@ def gcutil_addinstance(project, name, description,
   disk = None,
   disks = [] ,
   image = None,
+  metadata = {},
   persistent_boot_disk = False,
   additional_options = ''
   ):
@@ -94,6 +95,8 @@ def gcutil_addinstance(project, name, description,
     exit(1)
   if not machine_type:
     machine_type = project.default('machine_type')
+  if not image:
+    image = project.default('image')
   if not zone:
     zone = project.default('zone')
   if not network:
@@ -109,6 +112,8 @@ def gcutil_addinstance(project, name, description,
 
   date = str(datetime.now())
 
+  name = project.default('vm_prefix') + name
+
   # Addons...
   public_ip_addon = '--external_ip_address=ephemeral' if public_ip == True else '--external_ip_address=none'
   if (public_ip.__class__ == str):
@@ -122,31 +127,18 @@ def gcutil_addinstance(project, name, description,
 
   persistent_boot_disk_opts = '--persistent_boot_disk' if persistent_boot_disk else "--nopersistent_boot_disk"
   
-#   addinstance_opts_old = """--tags='%s' \
-#   --zone='%s' \
-#   --machine_type='%s' \
-#   --metadata_from_file=startup-script:%s \
-#   --metadata=startup-metadata:project:%s:e=py^2 \
-#   --metadata=date_creation:'%s' \
-#   --metadata=project_id:%s \
-#   --network='%s' \
-#   %s \
-#   %s \
-#   %s \
-#   %s \
-#   %s \
-# """ % ( 
-#     ','.join(all_tags), zone, machine_type,	startup_script, project, 
-# 	date, project, network, disk_addon, public_ip_addon, image_addon, persistent_boot_disk_opts,
-#   additional_options 
-#   )
+  metadata_addon = ' =TODO= '
+  metadata.update(project.metadata())
+  for k in metadata.keys():
+    metadata_addon = "--metadata='{}:{}' ".format(k, metadata[k])
+
   addinstance_opts = """--tags='{tags}' \
   --zone='{zone}' \
   --machine_type='{mt}' \
   --metadata_from_file=startup-script:{startup} \
   --metadata=startup-metadata:project:{project_id}:maybeIssuesWithNumbers \
   --metadata=date_creation:'{date}' \
-  --metadata=project_id:{project_id} \
+  {metadata_addon} \
   --network='{net}' \
   {disk_addon} \
   {public_ip_addon} \
@@ -158,7 +150,7 @@ def gcutil_addinstance(project, name, description,
     zone=zone, 
     mt=machine_type, 
     startup=startup_script, 
-    project_id=project, 
+    project_id=project.project_id, 
     date=date, 
     net=network, 
     disk_addon=disk_addon, 
@@ -166,12 +158,13 @@ def gcutil_addinstance(project, name, description,
     image_addon=image_addon,
     persistent_boot_disk_opts=persistent_boot_disk_opts,
     additional_options=additional_options, 
+    metadata_addon=metadata_addon,
   )
 
 
-  command = '''gcutil addinstance '%s' --project=%s --description='[%s] %s' \
+  command = '''gcutil addinstance --project %s '%s' --description='[%s] %s' \
 	%s \
-	''' % (name, project.project_id, project.name, description, addinstance_opts)
+	''' % (project.project_id, name, project.name, description, addinstance_opts)
   execute(project, command)
 
 def gcutil_adddisk(project,diskname, zone = None):

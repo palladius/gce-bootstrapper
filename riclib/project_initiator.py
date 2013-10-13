@@ -12,10 +12,10 @@ class ProjectInitiator:
   project = None
   config = { 'foo': 'configurator'}
 
-  def __init__(self, filename):
+  def __init__(self, filename, conf=None):
     # self.data = []
     self.name = os.path.basename(filename)[:-3] # removing the ".py" extension..
-    self.config = config.getConfigYaml()
+    self.config = conf if conf else config.getConfigYaml()
     self.project_id = self.config['project_id']
     self.id = self.config['project_id'] # alias for readability
     print "ProjectInitiator.new('%s') => '%s'" % (self.project, self.config)
@@ -57,8 +57,8 @@ class ProjectInitiator:
       exit(100)
     return self.config['defaults'][mykey]
 
-  def __repr__(self):
-    return "ProjectInitiatorRepr(name: '', id: '')".format(self.name, self.project_id)
+  def metadata(self):
+    return self.config['metadata']
 
-  def __str__(self):
-    return "ProjectInitiatorStr(name: '', id: '')".format(self.name, self.project_id)
+  def __repr__(self):
+    return "ProjectInitiator('{}', id='{}')".format(self.name, self.project_id)
