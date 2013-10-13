@@ -18,3 +18,6 @@ production:
   admin:
     email: YOUREMAIL_HERE@example.com
     name:  NAME SURNAME
+  metadata:
+    foo: bar
+    explaination: put here any key/value pair you want to assign to EVERY machine.

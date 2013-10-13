@@ -61,8 +61,7 @@ def gcompute_addfirewall(project, name, description, additional_options):
   sorry for my lazyness  
   ''' 
   command = '''gcutil addfirewall '%s' --project=%s:%s --description='[%s.py] %s' \
-  %s \
-  ''' % (name, default_group,project, project, description, additional_options)
+  %s ''' % (name, default_group,project, project, description, additional_options)
   deb(command)
   os.system(command)
 

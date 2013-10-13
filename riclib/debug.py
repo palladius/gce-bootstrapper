@@ -1,10 +1,10 @@
 
 
 
-def deb(str, debug=True):
+def deb(s, debug=True):
   '''Colored Debug function'''
-  if len(str) > 0 and debug:
-    print "\033[1;30m#DEB# %s\033[0m\n" % str 
+  if len(s) > 0 and debug:
+    print "\033[1;30m#DEB# {}\033[0m".format(s) 
 
 
 def debug_app():

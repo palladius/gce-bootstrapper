@@ -4,17 +4,38 @@
 # projects/*.addon
 
 script_ver = '0.9.4'
-projects_dir = './projects/'
+
 
 import sys 
 import os
 import re
+import yaml
 
 import riclib
-
 from riclib.debug import deb, debug_app
-  
-def valid_projects():
+
+defaults = {
+  'project_dir':  './projects/',
+}
+
+def getConfigYaml(file='config.yml'):
+  """Returns a dict with configuration.
+
+  Also provides correct messaging in case of error/
+  """
+  conf = {}
+  try:
+    yml = open("config.yml", 'r')
+    whole_conf = yaml.load(yml)
+    deb( whole_conf)
+    conf = whole_conf['production']
+    deb( conf)
+  except e:
+    print "Some exception: {}".format(e)
+  return conf
+
+
+def valid_projects(projects_dir=defaults['project_dir']):
   '''Returns a list of valid projects.
 
   That is taken from files: "projects/*.addon"
@@ -33,8 +54,12 @@ def usage():
   print 'Projects: ', ', '.join(valid_projects())
   exit(1)
 
-def bootstrap_project(project_name):
-  '''Bootstraps a project'''
+def bootstrap_project(project_name, projects_dir=defaults['project_dir']):
+  '''Bootstraps a project.
+
+  For a project to be valid, it has to have
+
+  '''
   if not(project_name in valid_projects()):
     print "Invalid project: " , project_name
     exit(2)
@@ -47,8 +72,9 @@ def bootstrap_project(project_name):
     print "Bash Script executed. "
   # search for python as well
   python_filename = projects_dir + project_name + ".py"
+  deb("Looking for py: {}".format(python_filename))
   if os.path.exists(python_filename):   # i.e.: 'projects/sakura.py'
-    print "great! executing python as well: ", python_filename
+    deb("Great! executing python as well: {}".format(python_filename))
     os.system("python %s" % python_filename)
     print "Python Script executed. "
 
@@ -56,6 +82,11 @@ def main():
   deb("ARGV: {}".format(sys.argv))
   if len(sys.argv) < 2:
     usage()
+  config = getConfigYaml()
+  print "== Config =="
+  print "Config: {}".format(config)
+  print "Config.project: {}".format(config['project'])
+  print "Config.bucket:  {}".format(config['bucket'])
   bootstrap_project(sys.argv[1])
 
 main()

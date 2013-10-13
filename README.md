@@ -6,12 +6,16 @@ based on projects.
 
 Try this:
 
-   bin/bootstrap.py
+   `cp config.yml.dist config.yml`
+   `vi config.yml`  # Edit with your project configuration
+   `./bootstrap.py`
 
+BUILD YOUR OWN PROJECT
+----------------------
 
 To build your own application, please follow the structure of my projects like this:
 
-	mkdir projects/MYPROJECT.d/
+	mkdir projects/MYPROJECT/
 	cp projects/sakura.py projects/MYPROJECT.py
 
 TODO
