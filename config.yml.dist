@@ -1,7 +1,11 @@
 ##############################################
+#
 # This is a sample configuration file. 
 # production will be used
 # everything else will be discarded
+#
+# YAML CONF: 1.0
+##############################################
 
 production:
   # Put your project ID or project number here
@@ -9,15 +13,21 @@ production:
   # Your bucket. Valid values are: "gs://BUCKETNAME/" or "gs://BUCKET/sub/path", note you have to quote this.
   bucket:  "gs://YOURBUCKET/"
   # Here the default values for gcutil
+  description: Describe your project here if you wish.
   defaults: 
     zone:           europe-west1-b
     machine_type:   n1-standard-1
     network:        default
     startup_script: ./riclib/scripts/common-startup-script.sh
-    vm_prefix:      "test-gceprovisioner-"
+    vm_prefix:      "test-gceprovisioner-"                      # set to empty string or delete if you don't want this feature.
+    persistent_boot_disk: True                                  # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
   admin:
     email: YOUREMAIL_HERE@example.com
     name:  NAME SURNAME
   metadata:
-    foo: bar
+    # Use to set Project-wide metadata.
+    password: Y0u11n3v3rGu3ss
     explaination: put here any key/value pair you want to assign to EVERY machine.
+  tags: # Use this to set additional tags for the project
+  - foo
+  - useful_to_delete_me

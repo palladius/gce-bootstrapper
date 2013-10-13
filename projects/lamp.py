@@ -6,7 +6,12 @@ import riclib
 from riclib.gcompute import *
 from riclib.project_initiator import *
 
-config = 123
+
+cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+print "cmd_folder: ", cmd_folder
+
+#config = riclib.config.getConfigYaml(defaults['yaml_file'])
+
 
 def main2():
   project = autodetect_project(sys.argv[0])
@@ -29,13 +34,13 @@ def main():
   
   p.delinstances( ['test','nagios-ea'] ) # recreate it all the time
   
-  p.addfirewall('rails3000', 'rails devel 3000', '--allowed=tcp:3000' )
+  p.addfirewall('http80', 'Apache port 80', '--allowed=tcp:80' )
 
-  gcompute_adddisk(project, 'd1', zone = my_zone)
-  gcompute_adddisk(project, 'd2', zone = my_zone)
-  gcompute_adddisk(project, 'd3', zone = my_zone)
-  gcompute_adddisk(project, 'd4', zone = my_zone)
+  # Adding disks
+  gcompute_adddisk(project, 'd2', )
+  #gcompute_adddisk(project, 'd1', zone = "some other zone")
 
+  # Adding instances
   gcompute_addinstance(project, "nagios-ea", "Nagios zone my_zone_a",  public_ip = True, network=net, zone = my_zone_a, disk = 'nagios-ea', tags=['lampy'])
   gcompute_addinstance(project, "nagios-eb", "Nagios zone my_zone_b",  public_ip = True, network=net, zone = my_zone_b, disk = 'nagios-eb', tags=['lampy'])
 

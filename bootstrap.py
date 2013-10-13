@@ -9,30 +9,14 @@ script_ver = '0.9.4'
 import sys 
 import os
 import re
-import yaml
 
 import riclib
 from riclib.debug import deb, debug_app
 
 defaults = {
   'project_dir':  './projects/',
+  'yaml_file':    'config.yml',
 }
-
-def getConfigYaml(file='config.yml'):
-  """Returns a dict with configuration.
-
-  Also provides correct messaging in case of error/
-  """
-  conf = {}
-  try:
-    yml = open("config.yml", 'r')
-    whole_conf = yaml.load(yml)
-    deb( whole_conf)
-    conf = whole_conf['production']
-    deb( conf)
-  except e:
-    print "Some exception: {}".format(e)
-  return conf
 
 
 def valid_projects(projects_dir=defaults['project_dir']):
@@ -75,14 +59,14 @@ def bootstrap_project(project_name, projects_dir=defaults['project_dir']):
   deb("Looking for py: {}".format(python_filename))
   if os.path.exists(python_filename):   # i.e.: 'projects/sakura.py'
     deb("Great! executing python as well: {}".format(python_filename))
-    os.system("python %s" % python_filename)
-    print "Python Script executed. "
+    ret = os.system("python %s" % python_filename)
+    print "Python Script executed. ret={}".format(ret)
 
 def main():
   deb("ARGV: {}".format(sys.argv))
   if len(sys.argv) < 2:
     usage()
-  config = getConfigYaml()
+  config = riclib.config.getConfigYaml(defaults['yaml_file'])
   print "== Config =="
   print "Config: {}".format(config)
   print "Config.project: {}".format(config['project'])

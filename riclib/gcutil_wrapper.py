@@ -21,11 +21,10 @@ default_tags           = [ 'ricpy', 'zrh' ]
 # Zone REading from                                        2012-11-01 manually edited :)
 # TODO import from YAML!
 
-default_zone           = 'europe-west1-b'     # Europe, yay!
-default_group          = 'google.com'
-default_machine_type   = 'n1-standard-1'  # for old project its 'standard-1-cpu'
-default_network        = 'default'
-default_startup_script = './projects/riclib/scripts/common-startup-script.sh'
+#default_zone           = 'europe-west1-b'     # Europe, yay!
+#default_machine_type   = 'n1-standard-1'  # for old project its 'standard-1-cpu'
+#default_network        = 'default'
+#default_startup_script = './projects/riclib/scripts/common-startup-script.sh'
 
 
 lib_ver_history = '''
@@ -44,13 +43,13 @@ def execute(code):
   deb("Executing: " + code)
   os.system(code) 
 
-def gcompute_delinstance(project, name,   group = default_group):  
-  execute( """gcutil deleteinstance -f '%s' --project=%s:%s""" %    (name, group, project) )
+def gcompute_delinstance(project, name):  
+  execute( """gcutil deleteinstance -f '%s' --project=%s""" %    (name, group, project) )
 
-def gcompute_delinstances(project, names, group = default_group):
+def gcompute_delinstances(project, names):
   for name in names:
     deb("Deleting instance: %s" % name)
-    gcompute_delinstance(project, name, group)
+    gcompute_delinstance(project, name)
 
 #def gcompute_using_dict(mandatory_args, **opt_args):
 #  opt_args["arg_name"] ||= 'dflt'
@@ -76,6 +75,7 @@ def gcompute_addinstance(project, name, description,
   disk = None,
   disks = [] ,
   image = None,
+  persistent_boot_disk = False,
   additional_options = ''
   ):
   '''Adds an instance of gcompute (for the moment using the bash script, in the future using
@@ -104,8 +104,9 @@ def gcompute_addinstance(project, name, description,
   for disk2 in disks:
     disk_addon += ('--disk=%s ' % disk2) if disk2 else ''
   
-  #print "DEBUG: ", disk_addon
   deb(disk_addon)
+
+  persistent_boot_disk_opts = '--persistent_boot_disk' if persistent_boot_disk else "--nopersistent_boot_disk"
   
   addinstance_opts = """--tags='%s' \
   --zone='%s' \
@@ -123,9 +124,11 @@ def gcompute_addinstance(project, name, description,
   %s \
   %s \
   %s \
+  %s \
 """ % ( 
     ','.join(all_tags), zone, machine_type,	startup_script, project, 
-	date, project, network, disk_addon, public_ip_addon, image_addon, additional_options 
+	date, project, network, disk_addon, public_ip_addon, image_addon, persistent_boot_disk_opts,
+  additional_options 
   )
   command = '''gcutil addinstance '%s' --project=%s:%s --description='[%s.py] %s' \
 	%s \
@@ -151,10 +154,15 @@ Ric TODO add also size_gb and description.
   execute('''gcutil --project=%s:%s adddisk %s --zone='%s' &''' % (group,project, diskname, zone))
 
 
-def autodetect_project(file):
-  '''detects the project automatically'''
-  ret = os.path.basename(file)
-  return ret[:-3]                       # taking for granted it ends with '.py'
+#def autodetect_project(file):
+#  '''detects the project automatically. ie:#
+#
+#  /projects/pincopallo/a.sh#
+#
+#  Project: "pincopallo"
+#  '''
+#  ret = os.path.basename(file)
+#  return ret[:-3]                       # taking for granted it ends with '.py'
 
 def gsutil_push_files_for_project(project):
   '''This functions pushes into my Google Storage all my per-machine init scripts.
