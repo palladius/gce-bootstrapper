@@ -7,8 +7,8 @@ based on projects.
 Try this:
 
     cp config.yml.dist config.yml
-    vi config.yml                   # Edit with your project configuration
-    ./bootstrap.py  <PROJECT_NAME>  # (e.g. "load-balancer")
+    vi config.yml                       # Edit with your project configuration
+    ./bootstrap.py  <PROJECT_NAME>      # (e.g. "load-balancer")
 
 Build your own project
 ----------------------
