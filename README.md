@@ -6,22 +6,18 @@ based on projects.
 
 Try this:
 
-    `cp config.yml.dist config.yml`
-    `vi config.yml`  # Edit with your project configuration
-    `./bootstrap.py`
+    cp config.yml.dist config.yml
+    vi config.yml                   # Edit with your project configuration
+    ./bootstrap.py  <PROJECT_NAME>  # (e.g. "load-balancer")
 
 BUILD YOUR OWN PROJECT
 ----------------------
 
 To build your own application, please follow the structure of my projects like this:
 
-	mkdir projects/MYPROJECT/
-	cp projects/sakura.py projects/MYPROJECT.py
-
-TODO
-----
-
-See TODO file.
+    export PROJ=foobar
+	mkdir projects/$PROJ.d/
+	touch projects/sample.py projects/$PROJ.py
 
 
 Code
