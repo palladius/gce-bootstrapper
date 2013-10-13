@@ -10,7 +10,7 @@ Try this:
     vi config.yml                   # Edit with your project configuration
     ./bootstrap.py  <PROJECT_NAME>  # (e.g. "load-balancer")
 
-BUILD YOUR OWN PROJECT
+Build your own project
 ----------------------
 
 To build your own application, please follow the structure of my projects like this:
