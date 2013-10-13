@@ -29,9 +29,9 @@ def main():
   dflt_zone = zones[0]
   
   names_and_desc = [
-    ["web1", 'Webserver 1' ],
-    ["web2", 'Webserver 2' ],
-    ["web3", 'Webserver 3' ],
+    ["web1", 'Webserver 1 to Demonstrate Load Balancing' ],
+    ["web2", 'Webserver 2 to Demonstrate Load Balancing' ],
+    ["web3", 'Webserver 3 to Demonstrate Load Balancing' ],
   ]
 
   #######################################
