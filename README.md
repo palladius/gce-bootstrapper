@@ -6,9 +6,9 @@ based on projects.
 
 Try this:
 
-   `cp config.yml.dist config.yml`
-   `vi config.yml`  # Edit with your project configuration
-   `./bootstrap.py`
+    `cp config.yml.dist config.yml`
+    `vi config.yml`  # Edit with your project configuration
+    `./bootstrap.py`
 
 BUILD YOUR OWN PROJECT
 ----------------------
