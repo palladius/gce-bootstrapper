@@ -16,11 +16,12 @@ import os
 
 lib_ver_common         = '1.0.8'
 
-default_tags           = [ 'ricpy', 'zrh' ]
 
 # Zone REading from                                        2012-11-01 manually edited :)
 # TODO import from YAML!
 
+# TODO take from conf
+#default_tags           = [ 'ricpy', 'torino' ]
 #default_zone           = 'europe-west1-b'     # Europe, yay!
 #default_machine_type   = 'n1-standard-1'  # for old project its 'standard-1-cpu'
 #default_network        = 'default'
@@ -43,18 +44,18 @@ def execute(code):
   deb("Executing: " + code)
   os.system(code) 
 
-def gcompute_delinstance(project, name):  
-  execute( """gcutil deleteinstance -f '%s' --project=%s""" %    (name, group, project) )
+def gcutil_delinstance(project, name):  
+  execute( """gcutil --project={} deleteinstance -f '{}'""".format(name, project) )
 
-def gcompute_delinstances(project, names):
+def gcutil_delinstances(project, names):
   for name in names:
     deb("Deleting instance: %s" % name)
-    gcompute_delinstance(project, name)
+    gcutil_delinstance(project, name)
 
-#def gcompute_using_dict(mandatory_args, **opt_args):
+#def gcutil_using_dict(mandatory_args, **opt_args):
 #  opt_args["arg_name"] ||= 'dflt'
 
-def gcompute_addfirewall(project, name, description, additional_options):
+def gcutil_addfirewall(project, name, description, additional_options):
   '''Adds a firewall rule, additional oprtions is just a string... 
   
   sorry for my lazyness  
@@ -64,7 +65,7 @@ def gcompute_addfirewall(project, name, description, additional_options):
   deb(command)
   os.system(command)
 
-def gcompute_addinstance(project, name, description, 
+def gcutil_addinstance(project, name, description, 
   public_ip = False, 
   tags = [],
   group = default_group , 
@@ -136,7 +137,7 @@ def gcompute_addinstance(project, name, description,
   deb(command)
   os.system(command)
 
-def gcompute_adddisk(project,diskname,group = default_group, zone = default_zone):
+def gcutil_adddisk(project,diskname,group = default_group, zone = default_zone):
   '''adddisk                    Create a new machine disk.
                            Usage: gcutil.py [--global_flags] adddisk <disk_name> [--command_flags]
                            Flags for adddisk:
@@ -195,7 +196,7 @@ def common_post(project,group = default_group):
   for host in ('www'):
     gcutil_cmd(project, ('push %s ./var/gcutil-*txt ./var/gcutil-*json /var/www/rcarlesso/' % host) ) # push project stuff there
   
-def gcompute_setcommoninstancemetadata(project, arr_keys_values):
+def gcutil_setcommoninstancemetadata(project, arr_keys_values):
   pass
 
 ############################################
