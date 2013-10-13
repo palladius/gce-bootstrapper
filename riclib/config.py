@@ -8,10 +8,10 @@ It must have:
 
 import re
 import yaml
-from debug import deb
+from util import deb
 
 default_ymlfile = '../config.yml' # here we are one dir below :)
-mandatory_fields = ['project', 'bucket', 'metadata', 'admin', 'defaults']
+mandatory_fields = ['project_id', 'bucket', 'metadata', 'admin', 'defaults', 'dryrun']
 mandatory_secondary_fields = {
   'admin':    ['email', 'name'],
   'defaults': ['zone', 'machine_type', 'network' ],
@@ -50,7 +50,7 @@ def CheckValidity(config):
     """Asserts conig has some values.
 
     ie: 
-    - project (string or number), 
+    - project_id (string or number), 
     - bucket (string starting with gs://)
     - metadata (dict)
     - admin must have email and name
@@ -69,9 +69,6 @@ def CheckValidity(config):
             if not f2 in config[f1].keys():
                 return "'{}.{}' mandatory key2 missing".format(f1, f2)
 
-
-    m = re.search('^gs://.*',config['bucket'])
-    print "Match: {}".format(m)
     if not re.search('^gs://.*',config['bucket']):
        return "'bucket' conf field ('{}') must start with 'gs://'".format(config['bucket'])
 

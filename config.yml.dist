@@ -9,18 +9,22 @@
 
 production:
   # Put your project ID or project number here
-  project: YOUR_PROJECT_ID
+  project_id: YOUR_PROJECT_ID
   # Your bucket. Valid values are: "gs://BUCKETNAME/" or "gs://BUCKET/sub/path", note you have to quote this.
   bucket:  "gs://YOURBUCKET/"
   # Here the default values for gcutil
   description: Describe your project here if you wish.
+  dryrun: True                                                        # Set to False to effectively make this execute gcutil commands (this is a security precaution)
   defaults: 
-    zone:           europe-west1-b
-    machine_type:   n1-standard-1
-    network:        default
-    startup_script: ./riclib/scripts/common-startup-script.sh
-    vm_prefix:      "test-gceprovisioner-"                      # set to empty string or delete if you don't want this feature.
-    persistent_boot_disk: True                                  # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
+    zone:                 europe-west1-b
+    machine_type:         n1-standard-1
+    network:              default
+    startup_script:       ./riclib/scripts/common-startup-script.sh
+    vm_prefix:            "test-gceprovisioner-"                      # set to empty string or delete if you don't want this feature.
+    persistent_boot_disk: True                                        # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
+    tags:                                                             # Use this to set additional tags for every VM in project
+    - foobar
+    - useful_to_delete_me
   admin:
     email: YOUREMAIL_HERE@example.com
     name:  NAME SURNAME
@@ -28,6 +32,3 @@ production:
     # Use to set Project-wide metadata.
     password: Y0u11n3v3rGu3ss
     explaination: put here any key/value pair you want to assign to EVERY machine.
-  tags: # Use this to set additional tags for the project
-  - foo
-  - useful_to_delete_me

@@ -37,14 +37,9 @@ def main():
   #######################################
   # Commands
   #######################################
-  p = ProjectInitiator()
+  p = ProjectInitiator(sys.argv[0])
   p.addfirewall('goohttp', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=goohttp ' )
   p.addfirewall('gooderek2', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=goohttp --allowed_ip_sources:%s' % resticted_ips )
-  
-  p.addinstance("riclife",   'staticIP riclife.palladius.eu', public_ip=True, network=net,  tags=['www','goohttp','prod','ror'] )
-  p.addinstance("debbie", 'My MySQL database - persisted on disk', public_ip=True,  network=net, disk ='db', tags=['mysql','disk','db'] )
-  # DOESNT WORK!
-  #p.addinstance("pamela", 'SAMBA, FTP client and ric personal disk', network=net, disk ='discone', tags=['ftp','disk','samba'] )
   
   for hostname, description in names_and_desc:
     yellow("Creating normal host %s ('%s')" % (hostname, description) )
