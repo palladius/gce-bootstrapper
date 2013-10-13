@@ -28,18 +28,6 @@ This code is published here:
 * https://github.com/palladius/gce-bootstrapper
 
 
-Docs
-====
-
-The docs are here (Google only):
-
-* https://sites.google.com/a/google.com/cloud-support/compute-engine/projects/gce-provisioner
-
-In order to publish stuff, you should:
-
-* remove personal stuff from var/ and tmp/
-* remove passwords from your scripts. I'm slowly moving in Sakura passwords from script to metadata
-
 Thanks
 ------
 
