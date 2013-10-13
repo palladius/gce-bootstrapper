@@ -1,0 +1,20 @@
+##############################################
+# This is a sample configuration file. 
+# production will be used
+# everything else will be discarded
+
+production:
+  # Put your project ID or project number here
+  project: YOUR_PROJECT_ID
+  # Your bucket. Valid values are: "gs://BUCKETNAME/" or "gs://BUCKET/sub/path", note you have to quote this.
+  bucket:  "gs://YOURBUCKET/"
+  # Here the default values for gcutil
+  defaults: 
+    zone:           europe-west1-b
+    machine_type:   n1-standard-1
+    network:        default
+    startup_script: ./riclib/scripts/common-startup-script.sh
+    vm_prefix:      "test-gceprovisioner-"
+  admin:
+    email: YOUREMAIL_HERE@example.com
+    name:  NAME SURNAME
