@@ -13,9 +13,10 @@
 # Note this only work with debian/ubuntu based distros.
 ###########################################################################################
 
-VER=1.4.2
+VER=1.5.0
 
 FIRST_BOOT_HISTORY='
+20131014 1.5.0  riccardo more secure, removed custom disk script and apache2 personal stuff :)
 20131014 1.4.2  riccardo Using depured VM hostname, so now should retrieve correctly from gsutil.
 20131014 1.4.1  riccardo Copying this script to /root/
 20131014 1.4.0  riccardo Starting to integrate with new GitHub repo. Adding dynamic $BUCKET
@@ -56,13 +57,14 @@ function getmetadata() {
 ###########################################
 # Configuration stuff
 # apt-get install stuff
-INSTALLANDA_PACKAGES='apache2 git vim facter puppet etckeeper bzr make rubygems ruby nagios-nrpe-server sendmail netcat netcat6 iperf nmap cowsay links'
+INSTALLANDA_PACKAGES='apache2 git vim facter puppet etckeeper make rubygems ruby sendmail netcat netcat6 iperf nmap cowsay links'
 REMOVANDA_PACKAGES='nano emacs'
 GEMS_INSTALLANDA='ric rubygems-update' # rump 
 GEM_POST_OPTS=' --no-ri --no-rdoc'
 # rubygems-update : allows rubygems to go over 1.3.5 on old Ubuntu..
 # TODO peek from METADATA!
 ADMIN_EMAIL=$(getmetadata admin_email)
+ADMIN_NAME=$(getmetadata  admin_name)
 ADMIN_USER=$(getmetadata  admin_user)
  # TODO take it from metadata
 BASH_PREAMBLE='# This file was created by common-startup-script.sh. Edit at your own risk
@@ -70,13 +72,13 @@ BASH_PREAMBLE='# This file was created by common-startup-script.sh. Edit at your
 
 METADATA=$(curl http://metadata/0.1/meta-data/attributes/startup-metadata)
 PROJECT=$( echo "$METADATA" | cut -f 2 -d: )
+PROJECT_ID=$(curl http://metadata/0.1/meta-data/numeric-project-id)
 BUCKET=$( curl http://metadata/0.1/meta-data/attributes/bucket )
 BUCKET2=$(getmetadata bucket)
 ADDON=$(getmetadata addon)
 DEPURED_VM=$(getmetadata original-vm-name)
 IP="1.2.3.4" # TODO populate from metadata...
-#ADDON2=`cat /opt/google/ADDON`
-#ADDON3=`curl http://metadata/0.1/meta-data/attributes/addon`
+
 
 ############################################
 # common for all machines in this project
@@ -94,14 +96,13 @@ apt-get install -y $INSTALLANDA_PACKAGES
 apt-get purge   -y $REMOVANDA_PACKAGES
 
 # before etckeeper
-git config --global user.name "Riccardo auto-gcompute-robot"
-git config --global user.email rcarlesso+gcomputerobot@google.com
+git config --global user.name "$ADMIN_NAME"
+git config --global user.email $ADMIN_EMAIL
 
 
 # etckeeper installation
 sed -i 's:#\(VCS="git"\):\1:'  /etc/etckeeper/etckeeper.conf 
 sed -i 's:^\(VCS="bzr"\):#\1:' /etc/etckeeper/etckeeper.conf
-
 etckeeper init
 etckeeper commit -m 'first commit by init script with bazaar or maybe git by Riccardo'
 
@@ -154,25 +155,17 @@ if [ -f /home/$ADMIN_USER/ ] ; then
 fi
 
 #index which contains the Project name :)
-cat <<WWW_EOF > /var/www/index.html
+cat <<WWW_EOF > /var/www/index-bootsy.html
 <html><body>
-  <h1>Host $HOSTNAME ($ADDON)</h1>
-  <p>This page was created automatically from Riccardo mephistophelic script <tt><b>common-startup-script.sh v$VER</b></tt> (from $0) for addon <b>$ADDON</b>!</p>
+  <h1>Bootsy: $ADDON :: $HOSTNAME </h1>
+  <p>This page was created automatically from Bootsy script <tt><b>common-startup-script.sh v$VER</b></tt> (from $0) for addon <b>$ADDON</b>!</p>
   <p>See more docs <a href='https://developers.google.com/compute/docs/howtos/startupscript'>HERE</a>. Thanks, Riccardo</p>
-
-  * 
-   <a href='http://$IP/$ADMINUSER/gcutil-listinstances-$ADDON.txt'>Instances</a> 
-   <a href='http://$IP/$ADMINUSER/gcutil-listfirewalls-$PROJECT.txt'>Firewalls</a> 
-   <a href='http://$IP/$ADMINUSER/gcutil-getproject-$PROJECT.txt'>Project</a>
-   <a href='http://$IP/$ADMINUSER/gcutil-getproject-$PROJECT.json'>P.json</a>
-   <a href='http://$IP/$ADMINUSER/gcutil-listzones-$PROJECT.txt'>Zones</a> 
-  <br/>
 
   <h3>Custom metadata</h3>
 
   <p>Host-peculiar metadata: <b>$METADATA</b>
   <p>hostname: <b>$HOSTNAME</b>
-  <p>addon: <b>$ADDON</b>
+  <p>Addon: <b>$ADDON</b>
   <p>Project description: <pre>"$(curl http://metadata/0.1/meta-data/attributes/description )"</pre>
 
 </body></html>
@@ -186,23 +179,22 @@ WWW_EOF
 cat << BOTO_EOF > /root/.boto
 # $BASH_PREAMBLE
 [Credentials]
-gs_oauth2_refresh_token = 1/tUJTUltZ4mnaL1F6hMrMw74Vg-TARHmsndGENeGdEMc
+gs_oauth2_refresh_token = _YOUR_CONFIG_HERE
 [Boto]
 https_validate_certificates = True
 [GSUtil]
 default_api_version = 2
-default_project_id = 613126411804
+default_project_id = $PROJECT_ID
 [OAuth2]
 BOTO_EOF
 
-cp /root/.boto  ~rcarlesso/.boto
-chown rcarlesso ~rcarlesso/.boto
+cp /root/.boto  ~$ADMIN_USER/.boto
+chown $ADMIN_USER ~$ADMIN_USER/.boto
 
-# timezone... needs a dpkg-reconfgiure tzdata or reboot i guess :P
 echo Europe/Dublin > /etc/timezone
 
-mkdir -p /opt/google/bin /opt/google/sbin /opt/google/lib /opt/google/etc /opt/google/tmp /var/log/riccardo/  /var/www/rcarlesso
-chown rcarlesso /var/www/rcarlesso/
+mkdir -p /opt/google/bin /opt/google/sbin /opt/google/lib /opt/google/etc /opt/google/tmp /var/log/riccardo/  /var/www/$ADMIN_USER
+chown $ADMIN_USER /var/www/$ADMIN_USER/
 
 ln -s /opt/google /root/google
 
@@ -240,39 +232,13 @@ cd /root/ &&
 
       touch /root/errors-retrieving-hostbased-init-script-w-gsutil.touch
 
-############################################
-# Format disks, if any:
-cat <<FORMATDISKS_EOF > /opt/google/sbin/format-disks-by-riccardo
-#!/bin/sh
+# removed format disks by riccardo: there is one officially mantained by Google now.
 
-# this script was made by Riccardo Carlesso <rcarlesso@google.com> as part
-# of his init scripts. Use at your own risk. If misused, you can completely
-# delete an existing disk/partition.
-
-cd /dev/disk/by-id/
-for diskdev in virtio-disk-1 virtio-disk-2 virtio-disk-3 virtio-disk-4 virtio-disk-5 ; do
-  if [ -h \$diskdev ] ; then # exists and symlink
-    echo DEB Trying to make it work with: /mnt/gdisk-\$diskdev 
-    mkdir -p /mnt/gdisk-\$diskdev
-    mount -t ext4 \$diskdev /mnt/gdisk-\$diskdev && 
-      echo mounted \$diskdev &&
-        touch /mnt/gdisk-\$diskdev/mounted-without-formatting.touch || 
-    mkfs.ext4 /mnt/gdisk-\$diskdev &&
-      echo formatted \$diskdev && 
-        mount -t ext4 \$diskdev /mnt/gdisk-\$diskdev &&
-          echo also mounted \$diskdev &&
-            touch /mnt/gdisk-\$diskdev/formatted-and-mounted.touch
-  else
-    echo Apparently no file named: /dev/disk/by-id/\$diskdev
-  fi
-done  
-FORMATDISKS_EOF
-
-chmod 755 /opt/google/sbin/format-disks-by-riccardo /root/ /root/git /root/git/sakura /root/git/sakura/bin
+chmod 755  /root/ /root/git /root/git/sakura /root/git/sakura/bin
 
 echo $VER > /opt/google/VERSION
 
-echo "$FIRST_BOOT_HISTORY" >> opt/google/FIRST_BOOT_HISTORY
+echo "$FIRST_BOOT_HISTORY" >> /opt/google/FIRST_BOOT_HISTORY
 
 touch /root/03-end-of-common-startup-script-now-calling-custom.touch
 

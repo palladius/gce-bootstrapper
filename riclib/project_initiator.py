@@ -20,8 +20,7 @@ from configurator import getConfigYaml
 
 class ProjectInitiator:
   """This class is called when a Project has to be bootstrapped"""
-  project = None
-  config = {}
+  version = "1.1"
 
   def __init__(self, filename, conf=None):
     """Takes a filename which becomes the addon.
@@ -36,6 +35,7 @@ class ProjectInitiator:
     self.addon = addon
     self.config = conf if conf else getConfigYaml()
     self.project_id = self.config['project_id']
+    self.project    = self.config['project_id']
     self.id = self.config['project_id'] # alias for readability
 
     # Add metadata
@@ -45,9 +45,11 @@ class ProjectInitiator:
       ['environment', 'prod'],
       ['addon', self.addon],
       ['bucket', self.config['bucket']],
-      ['admin_email', self.config['admin']['email']],
-      ['admin_user', self.config['admin']['username']],
       ['vm_prefix', self.default('vm_prefix')],
+
+      ['admin_email', self.config['admin']['email']],
+      ['admin_name',  self.config['admin']['name']],
+      ['admin_user',  self.config['admin']['username']],
     ]
     for k,v in common_metadata:
       self.config['metadata'][k] = v
