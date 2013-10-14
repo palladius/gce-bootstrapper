@@ -167,28 +167,28 @@ Ric TODO add also size_gb and description.
 
 
 
-def gsutil_push_files_for_project(project):
-  '''This functions pushes into my Google Storage all my per-machine init scripts.
-  They are then pulled from init script...
-  '''
-  ptitle("gsutil-pushing hosts scripts for {}".format(project.addon()))
-  # gsutil multithreaded
-  cmd = """touch .placeholder.gsutil ; \
-    gsutil cp riclib/scripts/include.bash {}/addons/_common/include.bash ; \
-    gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder ; \
-    gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/ ; \
-    rm .placeholder.gsutil""".format(
-      addon=project.addon,
-      bucket=project.default('bucket'),
-    )
-  p.execute(cmd)
+# def gsutil_push_files_for_project(project):
+#   '''This functions pushes into my Google Storage all my per-machine init scripts.
+#   They are then pulled from init script...
+#   '''
+#   ptitle("gsutil-pushing hosts scripts for {}".format(project.addon()))
+#   # gsutil multithreaded
+#   cmd = """touch .placeholder.gsutil ; \
+#     gsutil cp riclib/scripts/include.bash {}/addons/_common/include.bash ; \
+#     gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder ; \
+#     gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/ ; \
+#     rm .placeholder.gsutil""".format(
+#       addon=project.addon,
+#       bucket=project.default('bucket'),
+#     )
+#   p.execute(cmd)
 
 
-def common_pre(project):
-  pyellow("Pre installation: %s" % project)
-  gsutil_push_files_for_project(project)
-  # Opening port 80.
-  project.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
+# def common_pre(project):
+#   pyellow("Pre installation: %s" % project)
+#   gsutil_push_files_for_project(project)
+#   # Opening port 80.
+#   project.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
 
 # def gcutil_cmd(p,subcommand):
 #   p.execute('gcutil --project=%s %s' % (p.id,subcommand) )

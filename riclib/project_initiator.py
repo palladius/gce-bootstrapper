@@ -71,23 +71,50 @@ class ProjectInitiator:
     self.execute("gcutil --project={} addforwardingrule {} --region={} {}".format(self.project_id, rulename, region, extra))
 
   def pre_install(self):
-    print "Doing some pre installation tasks.."
+    '''This functions pushes into Google Storage all my per-machine init scripts.
+    They are then pulled from init script...
+    '''
+    pyellow( "Doing some pre installation tasks..")
     self.setcommoninstancemetadata([
       ['owner', 'riccardo'],
       ['data', '$(data)'],
       ['environment', 'test'],
     ])
+    pyellow("gsutil ls of your bucketdir: {}".format(self.config['bucket']))
+    self.execute('gsutil ls {}'.format(self.config['bucket']), dryrun=False)
+    
+    # from gcutil_wrapper  
+    pyellow("Pre installation: %s" % self)
+    # Opening port 80.
+    #ptitle("gsutil-pushing hosts scripts for {}".format(self.addon()))
+    # gsutil multithreaded
+    cmds = [
+      "touch .placeholder.gsutil",
+      "gsutil cp riclib/scripts/include.bash {bucket}/addons/_common/include.bash",
+      "gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder",
+      "gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/",
+      "rm .placeholder.gsutil",
+    ]
+    for cmd in cmds:
+      # pyellow("Executing DEB: "+cmd)
+      self.execute(cmd.format(
+          addon=self.addon,
+          bucket=self.config['bucket'],
+          ), 
+        dryrun=False) # always a good action to do...
+    self.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(self.id))
+
 
   def post_install(self):
     """Doing some post installation tasks.."""
-    pyellow("{}: Post installation".format(self))
+    pyellow("{}: Post install".format(self))
     # requires boot script version 1.2.13 or more:
     # if there is a www host it pseudo puppetizes it :)
-    self.gcutil_cmd('push www projects/{}.d/host.*.sh /var/www/boot/'.format(self.addon))
+    #self.gcutil_cmd('push www projects/{}.d/host.*.sh /var/www/boot/'.format(self.addon))
     # the dir /var/www/'USERNAME' has been already created/rightowned with the init script :)
-    for host in ['www']:
-      self.gcutil_cmd('push {} ./var/gcutil-*txt ./var/gcutil-*json /var/www/{}/'.format(
-          host, self.config['admin']['username'])) # push project stuff there
+    #for host in ['www']:
+    #  self.gcutil_cmd('push {} ./var/gcutil-*txt ./var/gcutil-*json /var/www/{}/'.format(
+    #      host, self.config['admin']['username'])) # push project stuff there
     
 
   def dryrun(self):
@@ -117,11 +144,13 @@ class ProjectInitiator:
     self.deb("+ ProjectInitiator Destructor: {}".format(self))
     self.post_install()
 
-  def execute(self, cmd):
+  def execute(self, cmd, dryrun=None):
     """Wrapper to execute code.
     """
-    self.deb("Project Executing code (dryrun={}): '''{}'''".format(self.dryrun(), cmd))
-    if self.dryrun():
+    if dryrun is None:
+      dryrun = self.dryrun()
+    self.deb("Project Executing code (dryrun={}): '''{}'''".format(dryrun, cmd))
+    if dryrun:
       print "#DRYRUN# Wont execute this: '''{}'''".format(cmd)
     else:
         deb("PWARNING, executing: {}".format(cmd))

@@ -10,8 +10,8 @@
 production:
   # Put your project ID or project number here
   project_id: YOUR_PROJECT_ID
-  # Your bucket. Valid values are: "gs://BUCKETNAME/" or "gs://BUCKET/sub/path", note you have to quote this.
-  bucket:  "gs://YOURBUCKET/"
+  # Your bucket. Valid values are: "gs://BUCKETNAME" or "gs://BUCKET/sub/path", note you have to quote this. NO TRAILING slash please!
+  bucket:  "gs://YOURBUCKET"                        
   # Here the default values for gcutil
   description: Describe your project here if you wish.
   dryrun: True                                                        # Set to False to effectively make this execute gcutil commands (this is a security precaution)
