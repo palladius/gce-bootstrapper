@@ -87,9 +87,11 @@ class ProjectInitiator:
 
   def addforwardingrule(self,rulename, region=None, extra=''):
     """Creates a forwarding rule.
+
+    Beware thsat region is not 
     """
     if not region:
-      region = self.default('zone')
+      region = self.default('region') # eg europe-west1-a
     self.execute("gcutil --project={} addforwardingrule {} --region={} {}".format(self.project_id, rulename, region, extra))
 
   def pre_install(self):
@@ -151,6 +153,12 @@ class ProjectInitiator:
 
     That's taken from configuration under 'defaults' dict.
     """
+    if mykey == 'region':
+      zone = self.default('zone')                       # eg "europe-west1-a"
+      region = zone[:-2]                                # eg "europe-west1"
+      return region
+
+    # general catch all
     if mykey not in self.config['defaults'].keys():
       print "FATAL: key '{}' not found in config.defaults:\n{}".format(mykey, self.config )
       exit(100)

@@ -13,9 +13,10 @@
 # Note this only work with debian/ubuntu based distros.
 ###########################################################################################
 
-VER=1.4.1a
+VER=1.4.2
 
 FIRST_BOOT_HISTORY='
+20131014 1.4.2  riccardo Using depured VM hostname, so now should retrieve correctly from gsutil.
 20131014 1.4.1  riccardo Copying this script to /root/
 20131014 1.4.0  riccardo Starting to integrate with new GitHub repo. Adding dynamic $BUCKET
 20120924 1.3.9  riccardo sakura bin is now executable also by normal users 
@@ -279,7 +280,7 @@ touch /root/03-end-of-common-startup-script-now-calling-custom.touch
 # Uses gsutil to download a file for itself. This is sooooo Puppety! :)
 # It cant work because there's no way (yet) to inject the key in the hosts
 ################################################################################################### 
-GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$HOSTNAME.sh"
+GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$DEPURED_VM.sh"
 LOCAL_PATH=/root/my-personal-init-script.sh
 gsutil cp $BUCKET/projects/_common/include.bash /opt/google/lib/include.bash &&
  gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH && 
