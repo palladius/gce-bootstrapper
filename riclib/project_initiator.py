@@ -85,46 +85,33 @@ class ProjectInitiator:
   #   for 
   #   gcutil_setcommoninstancemetadata(self, arr_keys_values)
 
-  def addforwardingrule(self,rulename, region=None, extra=''):
+  def addforwardingrule(self,rulename, target, region=None, extra=''):
     """Creates a forwarding rule.
 
     Beware thsat region is not 
     """
     if not region:
-      region = self.default('region') # eg europe-west1-a
-    self.execute("gcutil --project={} addforwardingrule {} --region={} {}".format(self.project_id, rulename, region, extra))
+      region = self.default('region') # eg "europe-west1-a", slightly different from zone!
+    self.execute("gcutil --project={} addforwardingrule {} --region={} --target='{}' {}".format(self.project_id, rulename, region, target, extra))
 
   def pre_install(self):
     '''This functions pushes into Google Storage all my per-machine init scripts.
     They are then pulled from init script...
     '''
-    pyellow( "Doing some pre installation tasks..")
-    # self.setcommoninstancemetadata([
-    #   ['program', 'bootsy'],
-    #  # ['date', '$(data)'],
-    #   ['environment', 'prod'],
-    #   ['addon', self.addon],
-    #   ['admin_email', self.config['admin']['email']],
-    #   ['admin_user', self.config['admin']['username']],
-    #   ['vm_prefix', self.default('vm_prefix')],
-    # ])
+    pyellow("= Pre installation: %s =" % self)
     pyellow("gsutil ls of your bucketdir: {}".format(self.config['bucket']))
     self.execute('gsutil ls {}'.format(self.config['bucket']), dryrun=False)
     
-    # from gcutil_wrapper  
-    pyellow("Pre installation: %s" % self)
-    # Opening port 80.
-    #ptitle("gsutil-pushing hosts scripts for {}".format(self.addon()))
     # gsutil multithreaded
     cmds = [
       "touch .placeholder.gsutil",
-      "gsutil cp riclib/scripts/include.bash {bucket}/addons/_common/include.bash",
-      "gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder",
+      # TODO(ricc): if placeholder, then wait indefinitely.
+      "gsutil cp riclib/scripts/include.bash {bucket}/addons/_common/include.bash", # common includes
+      "gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder",                # to create the "directory", remember these are objects
       "gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/",
       "rm .placeholder.gsutil",
     ]
     for cmd in cmds:
-      # pyellow("Executing DEB: "+cmd)
       self.execute(cmd.format(
           addon=self.addon,
           bucket=self.config['bucket'],
@@ -132,18 +119,9 @@ class ProjectInitiator:
         dryrun=False) # always a good action to do...
     self.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(self.id))
 
-
   def post_install(self):
-    """Doing some post installation tasks.."""
-    pyellow("{}: Post install".format(self))
-    # requires boot script version 1.2.13 or more:
-    # if there is a www host it pseudo puppetizes it :)
-    #self.gcutil_cmd('push www projects/{}.d/host.*.sh /var/www/boot/'.format(self.addon))
-    # the dir /var/www/'USERNAME' has been already created/rightowned with the init script :)
-    #for host in ['www']:
-    #  self.gcutil_cmd('push {} ./var/gcutil-*txt ./var/gcutil-*json /var/www/{}/'.format(
-    #      host, self.config['admin']['username'])) # push project stuff there
-    
+    """Put here any post-cereation code."""
+    pass
 
   def dryrun(self):
     return self.config['dryrun']
