@@ -62,3 +62,9 @@ class ProjectInitiator:
 
   def __repr__(self):
     return "ProjectInitiator('{}', id='{}')".format(self.name, self.project_id)
+
+  def __del__(self):
+    """Should be the destructor."""
+    print "Project Destructor: "
+    # TODO call the post
+    #self.project.common_post()
