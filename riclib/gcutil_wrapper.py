@@ -186,7 +186,7 @@ Ric TODO add also size_gb and description.
   '''
   if not zone:
     zone = project.default('zone')
-  execute('''gcutil --project=%s adddisk %s --zone='%s' &''' % (project, diskname, zone))
+  execute('''gcutil --project=%s adddisk %s --zone='%s' &''' % (project.project_id, diskname, zone))
 
 
 

@@ -1,3 +1,12 @@
+"""This is a ProjectInitiator class.
+
+
+It provides utilities to call gcutil in a pythonic way.
+
+TODO(ricc): move all gcutil commands from gcutil_wrapper to here. I started with addforwardingrule
+            and it works pretty well. Ideally, move gcutil_addinstance, the rest is easy.
+"""
+
 
 from gcutil_wrapper import *
 
@@ -13,7 +22,6 @@ class ProjectInitiator:
   config = { 'foo': 'configurator'}
 
   def __init__(self, filename, conf=None):
-    # self.data = []
     self.name = os.path.basename(filename)[:-3] # removing the ".py" extension..
     self.config = conf if conf else config.getConfigYaml()
     self.project_id = self.config['project_id']
@@ -36,6 +44,13 @@ class ProjectInitiator:
   def setcommoninstancemetadata(self,arr_keys_values):
     gcutil_setcommoninstancemetadata(self, arr_keys_values)
 
+  def addforwardingrule(self,rulename, region=None, extra=''):
+    """Creates a forwarding rule.
+    """
+    if not region:
+      region = self.default('zone')
+    self.execute("gcutil --project={} addforwardingrule {} --region={} {}".format(self.project_id, rulename, region, extra))
+
   def pre_install(self):
     print "Doing some pre installation tasks.."
     self.setcommoninstancemetadata([
@@ -43,6 +58,11 @@ class ProjectInitiator:
       ['data', '$(data)'],
       ['environment', 'test'],
     ])
+
+  def post_install(self):
+    """Doing some post installation tasks.."""
+    print "Post install tasks"
+    gcutil_wrapper.common_post()
 
   def dryrun(self):
     return self.config['dryrun']
@@ -65,6 +85,16 @@ class ProjectInitiator:
 
   def __del__(self):
     """Should be the destructor."""
-    print "Project Destructor: "
-    # TODO call the post
-    #self.project.common_post()
+    deb("+ ProjectInitiator Destructor: {}".format(self))
+    self.post_install()
+
+  def execute(self, cmd):
+    """Wrapper to execute code.
+    """
+    deb("Project Executing code (dryrun={}): '''{}'''".format(self.dryrun(), cmd))
+    if self.dryrun():
+      print "#DRYRUN# Wont execute this: '''{}'''".format(cmd)
+    else:
+        deb("PWARNING, executing: {}".format(cmd))
+        ret = os.system(cmd)
+        print "[PCMD] return={}".format(ret)

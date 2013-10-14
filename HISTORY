@@ -1,3 +1,4 @@
+0.9.4: 20131015 Added FWDing rules for firewalls.
 0.9.3: 20131014 Refactored everything now it finally spins up machines.
                 Still to make the bash script go to GCS yet.
                 Also created a small working sample.py.
