@@ -18,9 +18,9 @@ def main():
   # Configuration
   #######################################
   names_and_desc = [
-    ["foo", 'Server foo' ],
-    ["bar", 'Server bar, for alcoholics' ],
-    ["baz", 'Lots of baz around this topic' ],
+    ["foo", 'Server foo',  ],
+    ["bar", 'Server bar, for alcoholics', ],
+    ["baz", 'Lots of baz around this topic', ],
   ]
 
   #######################################
