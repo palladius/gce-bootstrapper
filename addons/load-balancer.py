@@ -54,21 +54,26 @@ def main():
   
 
   for hostname, description in names_and_desc:
-    p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip'], metadata={'gclb-affinity': 'ip'})
-  # p.addinstance('prod', 'Testing a production machine', public_ip = public_ip, network = 'unartra', tags=['prod', 'gclb-fw'], image='centos-6' , persistent_boot_disk=True )
+    p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip', ], metadata={'gclb-affinity': 'of some kind (depends on TP/FR)'})
 
   # GCLB stuff
-  p.addforwardingrule('bootsy-fr-aff-no', target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
-  #p.addforwardingrule('bootsy-fr-aff-ip') # , extra="--target=gclb-no-affinity")
-  #p.addforwardingrule('bootsy-fr-aff-proto') # , extra="--target=gclb-no-affinity")
-  p.gcutil_cmd("addtargetpoolinstance bootsy-aff-ip --instances {instances}".format(
+  p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
+  p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-ip".format(prefix=prefix))
+  #p.addforwardingrule('{prefix}bootsy-fr-aff-proto', target="{prefix}bootsy-tp-aff-proto".format(prefix=prefix))
+
+  p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(
     instances=','.join(instance_names),
+    prefix=prefix,
     )
   )
 
   # Firewalls
-  p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=gclb-fw' )
-  p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=gclb-fw --allowed_ip_sources={}'.format(resticted_ips))
+  p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
+  p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
+    resticted_ips))
+
+  # sleep 2 secs
+  # re-add with instance names...
 
 
 if __name__ == "__main__":
