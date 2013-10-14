@@ -15,6 +15,7 @@ production:
   # Here the default values for gcutil
   description: Describe your project here if you wish.
   dryrun: True                                                        # Set to False to effectively make this execute gcutil commands (this is a security precaution)
+  debug:  True
   defaults: 
     zone:                 europe-west1-b
     machine_type:         n1-standard-1

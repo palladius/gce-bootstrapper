@@ -10,21 +10,11 @@ from subprocess import call
 import subprocess
 import os
 
-# Zone REading from                                        2012-11-01 manually edited :)
-# TODO import from YAML!
-
-# TODO take from conf
-#default_tags           = [ 'ricpy', 'torino' ]
-#default_zone           = 'europe-west1-b'     # Europe, yay!
-#default_machine_type   = 'n1-standard-1'  # for old project its 'standard-1-cpu'
-#default_network        = 'default'
-#default_startup_script = './projects/riclib/scripts/common-startup-script.sh'
-
-
-lib_ver_common         = '1.1.0'
+lib_ver_common         = '1.1.1'
 
 lib_ver_history = '''
-20131013 1.1.0 pushing common.bash to /projects/common/include.bash
+20131014 1.1.1 moving stuff to Project, like execute()
+20131013 1.1.0 methods now take a project object always.
 20120924 1.0.6 pushing common.bash to /projects/common/include.bash
 20120924 1.0.5 adding jason dumps to vars (to rebuild key/vals in case I break them)
 201209?? 1.0.4 ???
@@ -37,19 +27,8 @@ lib_ver_history = '''
 '''
 
 
-def execute(p, cmd):
-  """Wrapper to execute code.
-  """
-  deb("Executing code (dryrun={}): '''{}'''".format(p.dryrun(), cmd))
-  if p.dryrun():
-    print "#DRYRUN# Wont execute this: '''{}'''".format(cmd)
-  else:
-      deb("WARNING, executing: {}".format(cmd))
-      ret = os.system(cmd)
-      print "[CMD] return={}".format(ret)
-
-def gcutil_delinstance(project, name):  
-  execute(project, """gcutil --project={} deleteinstance -f '{}'""".format(name, project) )
+def gcutil_delinstance(p, name):  
+  p.execute(project, """gcutil --project={} deleteinstance -f '{}'""".format(p.id(), name) )
 
 def gcutil_delinstances(project, names):
   # for name in names:
@@ -65,7 +44,7 @@ def gcutil_addfirewall(p, name, description, additional_options):
   ''' 
   command = '''gcutil addfirewall '%s' --project=%s --description='%s' \
   %s ''' % (name, p.id, description, additional_options)
-  execute(p, command)
+  p.execute(command)
 
 def gcutil_addinstance(project, name, description, 
   public_ip = False,
@@ -165,7 +144,7 @@ def gcutil_addinstance(project, name, description,
   command = '''gcutil addinstance --project %s '%s' --description='[%s] %s' \
 	%s \
 	''' % (project.project_id, name, project.name, description, addinstance_opts)
-  execute(project, command)
+  project.execute(command)
 
 def gcutil_adddisk(project,diskname, zone = None):
   '''adddisk
@@ -186,7 +165,7 @@ Ric TODO add also size_gb and description.
   '''
   if not zone:
     zone = project.default('zone')
-  execute('''gcutil --project=%s adddisk %s --zone='%s' &''' % (project.project_id, diskname, zone))
+  project.execute('''gcutil --project=%s adddisk %s --zone='%s' &''' % (project.project_id, diskname, zone))
 
 
 
@@ -194,22 +173,24 @@ def gsutil_push_files_for_project(project):
   '''This functions pushes into my Google Storage all my per-machine init scripts.
   They are then pulled from init script...
   '''
-  ptitle("gsutil-pushing hosts scripts for %s" % project)
+  ptitle("gsutil-pushing hosts scripts for {}".format(project.name()))
   # gsutil multithreaded
-  cmd = "touch .placeholder ; \
-    gsutil cp projects/riclib/scripts/include.bash gs://gce/projects/_common/include.bash ; \
-    gsutil cp .placeholder gs://gce/projects/%s/.placeholder ; \
-    gsutil -m cp projects/%s.d/host.*.sh gs://gce/projects/%s/" % (project,project,project)
-  print(cmd)
-  execute(cmd)
-
+  cmd = """touch .placeholder.gsutil ; \
+    gsutil cp projects/riclib/scripts/include.bash {}/projects/_common/include.bash ; \
+    gsutil cp .placeholder {bucket}/projects/{project_name}/.placeholder ; \
+    gsutil -m cp projects/{project_name}.d/host.*.sh {bucket}/projects/{project_name}/ ; \
+    rm .placeholder.gsutil""".format(
+      project_name=project.name,
+      bucket=project.default('bucket'),
+    )
+  p.execute(cmd)
 
 
 def common_pre(project):
   print "Welcome to project '%s'" % project
   # gsutil push stuff
   gsutil_push_files_for_project(project)
-  execute('''gcutil addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"''')
+  p.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
 
 def gcutil_cmd(project,subcommand):
   execute('gcutil --project=%s %s' % (project,subcommand) )

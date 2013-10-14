@@ -14,7 +14,8 @@ import sys
 import os.path
 # Adds "superior" dir to python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-from riclib import config
+from riclib import configurator
+from configurator import getConfigYaml
 
 class ProjectInitiator:
   """This class is called when a Project has to be bootstrapped"""
@@ -23,7 +24,7 @@ class ProjectInitiator:
 
   def __init__(self, filename, conf=None):
     self.name = os.path.basename(filename)[:-3] # removing the ".py" extension..
-    self.config = conf if conf else config.getConfigYaml()
+    self.config = conf if conf else getConfigYaml()
     self.project_id = self.config['project_id']
     self.id = self.config['project_id'] # alias for readability
     print "ProjectInitiator.new('%s') => '%s'" % (self.project, self.config)

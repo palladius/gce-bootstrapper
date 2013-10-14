@@ -1,5 +1,5 @@
 
 import util
 import gcutil_wrapper
-import config
+import configurator
 import project_initiator

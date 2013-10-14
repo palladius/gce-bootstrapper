@@ -11,7 +11,7 @@ import os
 import re
 
 import riclib
-from riclib.debug import deb, debug_app
+from riclib.util import deb, debug_app
 
 defaults = {
   'project_dir':  './projects/',
@@ -67,7 +67,7 @@ def main():
   deb("ARGV: {}".format(sys.argv))
   if len(sys.argv) < 2:
     usage()
-  config = riclib.config.getConfigYaml(defaults['yaml_file'])
+  config = riclib.configurator.getConfigYaml(defaults['yaml_file'])
   print "== Config =="
   print "Config: {}".format(config)
   print "Config.project: {}".format(config['project_id'])

@@ -6,16 +6,11 @@ import os.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 import riclib
-# from riclib import config
 from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
 
 def main():
-  #project = autodetect_project(sys.argv[0])
-  p = ProjectInitiator(sys.argv[0])
-  # common_pre(project)
-  #project.common_pre()
 
   #######################################
   # Configuration
@@ -23,18 +18,19 @@ def main():
   public_ip = True
   #zones  = ["us-central1-a", "us-east1-a", "europe-west1-a", "europe-west1-b"]
   # dig +short $(hostname)
-  resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4'
-  
+  resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4'  
   names_and_desc = [
     ["web1", 'Webserver 1 to Demonstrate Load Balancing' ],
     ["web2", 'Webserver 2 to Demonstrate Load Balancing' ],
     ["web3", 'Webserver 3 to Demonstrate Load Balancing' ],
   ]
 
+
   #######################################
   # Commands
   #######################################
-  
+  p = ProjectInitiator(sys.argv[0])
+
   for hostname, description in names_and_desc:
     yellow("Creating normal host %s ('%s')" % (hostname, description) )
     p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip'], metadata={ 'gclb-affinity': 'ip'})
@@ -45,7 +41,5 @@ def main():
 
   p.addforwardingrule('ricc-fwd-rule', region=p.default('zone'), extra="--target=gclb-03563758-no-affinity")
 
-  # common_post(project)
-  #project.common_post()
-
-main()
+if __name__ == "__main__":
+  main()
