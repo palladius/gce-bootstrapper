@@ -13,9 +13,10 @@
 # Note this only work with debian/ubuntu based distros.
 ###########################################################################################
 
-VER=1.3.9
+VER=1.4.1
 
 FIRST_BOOT_HISTORY='
+20131014 1.4.1  riccardo Copying this script to /root/
 20131014 1.4.0  riccardo Starting to integrate with new GitHub repo. Adding dynamic $BUCKET
 20120924 1.3.9  riccardo sakura bin is now executable also by normal users 
 20120924 1.3.8  riccardo gsutil-downloading /opt/google/lib/include.bash
@@ -73,6 +74,8 @@ set -x
 if [-f /opt/google/lib/include.bash ]; then
   . /opt/google/lib/include.bash
 fi
+
+cp "$0" "/root/startup-script-copy-$(date +%s).sh"
 
 apt-get update
 apt-get install -y $INSTALLANDA_PACKAGES
