@@ -72,6 +72,7 @@ PROJECT=$( echo "$METADATA" | cut -f 2 -d: )
 BUCKET=$( curl http://metadata/0.1/meta-data/attributes/bucket )
 BUCKET2=$(getmetadata bucket)
 ADDON=$(getmetadata addon)
+DEPURED_VM=$(getmetadata original-vm-name)
 IP="1.2.3.4" # TODO populate from metadata...
 #ADDON2=`cat /opt/google/ADDON`
 #ADDON3=`curl http://metadata/0.1/meta-data/attributes/addon`

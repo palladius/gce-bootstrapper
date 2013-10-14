@@ -67,6 +67,11 @@ class ProjectInitiator:
     gcutil_adddisk(self,diskname,group,zone)
 
   def addinstance(self, name, description, **kwargs):
+    """Adds an instance. Very complicated code :/
+
+    It would be nice here to add the "virtual instance name".
+    
+    """
     gcutil_addinstance(self, name, description, **kwargs)
 
   def addfirewall(self, name, description, args):

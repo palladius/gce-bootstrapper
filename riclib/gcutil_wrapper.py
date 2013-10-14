@@ -10,9 +10,10 @@ from subprocess import call
 import subprocess
 import os
 
-lib_ver_common         = '1.1.1'
+lib_ver_common         = '1.1.2'
 
 lib_ver_history = '''
+20131015 1.1.2 Added 'original-vm-name' metadata
 20131014 1.1.1 moving stuff to Project, like execute()
 20131013 1.1.0 methods now take a project object always.
 20120924 1.0.6 pushing common.bash to /projects/common/include.bash
@@ -87,6 +88,7 @@ def gcutil_addinstance(project, name, description,
 
   date = str(datetime.now())
 
+  metadata['original-vm-name'] = name         # without prefix
   name = project.default('vm_prefix') + name
 
   # Addons...
@@ -136,7 +138,6 @@ def gcutil_addinstance(project, name, description,
     metadata_addon=metadata_addon,
   )
 
-
   command = '''gcutil --project {} addinstance '{}' --description='[{}] {}' {}  '''.format(
       project.project_id, name, project.addon, description, addinstance_opts)
   project.execute(command)
@@ -161,35 +162,4 @@ Ric TODO add also size_gb and description.
   if not zone:
     zone = project.default('zone')
   project.execute('''gcutil --project=%s adddisk %s --zone='%s' &''' % (project.project_id, diskname, zone))
-
-
-
-# def gsutil_push_files_for_project(project):
-#   '''This functions pushes into my Google Storage all my per-machine init scripts.
-#   They are then pulled from init script...
-#   '''
-#   ptitle("gsutil-pushing hosts scripts for {}".format(project.addon()))
-#   # gsutil multithreaded
-#   cmd = """touch .placeholder.gsutil ; \
-#     gsutil cp riclib/scripts/include.bash {}/addons/_common/include.bash ; \
-#     gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder ; \
-#     gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/ ; \
-#     rm .placeholder.gsutil""".format(
-#       addon=project.addon,
-#       bucket=project.default('bucket'),
-#     )
-#   p.execute(cmd)
-
-
-# def common_pre(project):
-#   pyellow("Pre installation: %s" % project)
-#   gsutil_push_files_for_project(project)
-#   # Opening port 80.
-#   project.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
-
-# def gcutil_cmd(p,subcommand):
-#   p.execute('gcutil --project=%s %s' % (p.id,subcommand) )
-
-# def gcutil_setcommoninstancemetadata(project, arr_keys_values):
-#   pass
 

@@ -9,6 +9,7 @@ import riclib
 from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
+version = '1.3'
 
 def main():
 
@@ -34,11 +35,12 @@ def main():
   for hostname, description in names_and_desc:
     # pyellow("Creating normal host %s ('%s')" % (hostname, description) )
     p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip'], metadata={ 'gclb-affinity': 'ip'})
-  p.addinstance('prod', 'Testing a production machine', public_ip = public_ip, network = 'unartra', tags=['prod'], image='centos-6' , persistent_boot_disk=True )
+  p.addinstance('prod', 'Testing a production machine', public_ip = public_ip, network = 'unartra', tags=['prod', 'gclb-fw'], image='centos-6' , persistent_boot_disk=True )
 
-  p.addfirewall('goohttp', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=goohttp ' )
-  p.addfirewall('gooderek2', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=goohttp --allowed_ip_sources:%s' % resticted_ips )
-
+  p.addfirewall('http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=gclb-fw' )
+  p.addfirewall('http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=gclb-fw --allowed_ip_sources={}'.format(resticted_ips))
+  
+  # GCLB stuff
   p.addforwardingrule('ricc-fwd-rule', region=p.default('zone'), extra="--target=gclb-03563758-no-affinity")
 
 if __name__ == "__main__":
