@@ -108,7 +108,7 @@ def gcutil_addinstance(project, name, description,
   metadata_addon = ''
   metadata.update(project.metadata())
   for k in metadata.keys():
-    metadata_addon = "--metadata='{}:{}' ".format(k, metadata[k])
+    metadata_addon = metadata_addon + "--metadata='{}:{}' ".format(k, metadata[k])
 
   addinstance_opts = """--tags='{tags}' \
   --zone='{zone}' \
