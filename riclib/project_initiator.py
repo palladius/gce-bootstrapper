@@ -37,6 +37,21 @@ class ProjectInitiator:
     self.config = conf if conf else getConfigYaml()
     self.project_id = self.config['project_id']
     self.id = self.config['project_id'] # alias for readability
+
+    # Add metadata
+    common_metadata = [
+      ['program', 'bootsy'],
+     # ['date', '$(data)'],
+      ['environment', 'prod'],
+      ['addon', self.addon],
+      ['bucket', self.config['bucket']],
+      ['admin_email', self.config['admin']['email']],
+      ['admin_user', self.config['admin']['username']],
+      ['vm_prefix', self.default('vm_prefix')],
+    ]
+    for k,v in common_metadata:
+      self.config['metadata'][k] = v
+
     print "ProjectInitiator.new('%s') => '%s'" % (self.project, self.config)
     self.pre_install()
 
@@ -60,8 +75,10 @@ class ProjectInitiator:
   def delinstances(self, arr_of_instance_names):
     gcutil_delinstances(self, arr_of_instance_names)
 
-  def setcommoninstancemetadata(self,arr_keys_values):
-    gcutil_setcommoninstancemetadata(self, arr_keys_values)
+  # def setcommoninstancemetadata(self,arr_keys_values):
+  #   """Gets an array of metadata, puts them into self.metadata."""
+  #   for 
+  #   gcutil_setcommoninstancemetadata(self, arr_keys_values)
 
   def addforwardingrule(self,rulename, region=None, extra=''):
     """Creates a forwarding rule.
@@ -75,11 +92,15 @@ class ProjectInitiator:
     They are then pulled from init script...
     '''
     pyellow( "Doing some pre installation tasks..")
-    self.setcommoninstancemetadata([
-      ['owner', 'riccardo'],
-      ['data', '$(data)'],
-      ['environment', 'test'],
-    ])
+    # self.setcommoninstancemetadata([
+    #   ['program', 'bootsy'],
+    #  # ['date', '$(data)'],
+    #   ['environment', 'prod'],
+    #   ['addon', self.addon],
+    #   ['admin_email', self.config['admin']['email']],
+    #   ['admin_user', self.config['admin']['username']],
+    #   ['vm_prefix', self.default('vm_prefix')],
+    # ])
     pyellow("gsutil ls of your bucketdir: {}".format(self.config['bucket']))
     self.execute('gsutil ls {}'.format(self.config['bucket']), dryrun=False)
     

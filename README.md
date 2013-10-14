@@ -1,8 +1,9 @@
 gce-bootstrapper
 ----------------
 
-This is my first Google Compute Engine project. I use it to configure/bootstrap my machines,
-based on projects.
+gce-bootstrapper (codename `bootsy`) is my first Google Compute Engine project. I use it to configure/bootstrap my machines,
+based on the concept of `addons`. Note that this is a very rudimental script, if you need to do anything more complex, you
+might want to use a proper config Management system (eg Puppet, Chef, ..): these two for sure have good modules for GCE.
 
 Try this:
 

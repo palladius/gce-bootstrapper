@@ -25,6 +25,7 @@ production:
     tags:                                                             # Use this to set additional tags for every VM in project
     - foobar
     - useful_to_delete_me
+    - bootsy
     vm_prefix:            "test-provisioner-"                         # set to empty string or delete if you don't want this feature.
     zone:                 europe-west1-b
   admin:

@@ -31,9 +31,6 @@ def gcutil_delinstance(p, name):
   p.execute(project, """gcutil --project={} deleteinstance -f '{}'""".format(p.id(), name) )
 
 def gcutil_delinstances(project, names):
-  # for name in names:
-  #   print("Deleting instance: %s" % name)
-  #   gcutil_delinstance(project, name)
   gcutil_delinstance(project, ' '.join(name))
 
 
@@ -193,6 +190,6 @@ Ric TODO add also size_gb and description.
 # def gcutil_cmd(p,subcommand):
 #   p.execute('gcutil --project=%s %s' % (p.id,subcommand) )
 
-def gcutil_setcommoninstancemetadata(project, arr_keys_values):
-  pass
+# def gcutil_setcommoninstancemetadata(project, arr_keys_values):
+#   pass
 

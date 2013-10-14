@@ -13,7 +13,7 @@
 # Note this only work with debian/ubuntu based distros.
 ###########################################################################################
 
-VER=1.4.1
+VER=1.4.1a
 
 FIRST_BOOT_HISTORY='
 20131014 1.4.1  riccardo Copying this script to /root/
@@ -44,6 +44,14 @@ FIRST_BOOT_HISTORY='
 20120604 1.2.2  riccardo Supports per-project behaviour thru metadata
 20120604 1.2.1  riccardo Installs nifty packages like git, etckeeper, puppet, facter, ...
 '
+
+function getmetadata() {
+  # TODO check for 404 inside the answer, if so return error.
+  # sth like this:
+  # curl http://metadata/0.1/meta-data/attributes/ | egrep ^$1\$
+   curl http://metadata/0.1/meta-data/attributes/$1
+}
+
 ###########################################
 # Configuration stuff
 # apt-get install stuff
@@ -52,19 +60,21 @@ REMOVANDA_PACKAGES='nano emacs'
 GEMS_INSTALLANDA='ric rubygems-update' # rump 
 GEM_POST_OPTS=' --no-ri --no-rdoc'
 # rubygems-update : allows rubygems to go over 1.3.5 on old Ubuntu..
-ADMIN_EMAIL=palladiusbonton@gmail.com
 # TODO peek from METADATA!
-ADMIN_USER=rcarlesso
+ADMIN_EMAIL=$(getmetadata admin_email)
+ADMIN_USER=$(getmetadata  admin_user)
  # TODO take it from metadata
 BASH_PREAMBLE='# This file was created by common-startup-script.sh. Edit at your own risk
 # At next reboot, it *should* be overwritten again (but nowe its not yet maybe a bug in documentation?)'
 
 METADATA=$(curl http://metadata/0.1/meta-data/attributes/startup-metadata)
 PROJECT=$( echo "$METADATA" | cut -f 2 -d: )
-BUCKET=$( curl http://metadata/0.1/meta-data/attributes/mybucket )
-ADDON=`cat /opt/google/PROJECT`
-ADDON2=`cat /opt/google/ADDON`
-
+BUCKET=$( curl http://metadata/0.1/meta-data/attributes/bucket )
+BUCKET2=$(getmetadata bucket)
+ADDON=$(getmetadata addon)
+IP="1.2.3.4" # TODO populate from metadata...
+#ADDON2=`cat /opt/google/ADDON`
+#ADDON3=`curl http://metadata/0.1/meta-data/attributes/addon`
 
 ############################################
 # common for all machines in this project
@@ -103,6 +113,7 @@ cat <<ALIASES_EOF > ~/.bash_aliases
   # edit at will! Riccardo
   #
   # Project:           $PROJECT
+  # Addon:             $ADDON
   # Hostname:          $(hostname)
   # Date:              $(date)
   # StartupScript ver: $VER
@@ -114,7 +125,7 @@ cat <<ALIASES_EOF > ~/.bash_aliases
   alias sb='source ~/.bashrc'
   alias cdg='cd /opt/google/'
   alias sauu='sudo apt-get update && sudo apt-get dist-upgrade'
-  alias aiuto='getmetadata description 2>/dev/null| cowsay'
+  alias helpme='getmetadata description 2>/dev/null| cowsay'
 
   export PS1='\u@$(hostname -f):\w\$ '
   
@@ -143,25 +154,23 @@ fi
 #index which contains the Project name :)
 cat <<WWW_EOF > /var/www/index.html
 <html><body>
-  <h1>Host $HOSTNAME ($PROJECT)</h1>
-  <p>This page was created automatically from Riccardo mephistophelic script <tt><b>common-startup-script.sh v$VER</b></tt> (from $0) for project <b>$PROJECT</b>!</p>
+  <h1>Host $HOSTNAME ($ADDON)</h1>
+  <p>This page was created automatically from Riccardo mephistophelic script <tt><b>common-startup-script.sh v$VER</b></tt> (from $0) for addon <b>$ADDON</b>!</p>
   <p>See more docs <a href='https://developers.google.com/compute/docs/howtos/startupscript'>HERE</a>. Thanks, Riccardo</p>
 
-  <h3><a href='http://173.255.116.17/rcarlesso/'>Palladia links</a></h3>
-  
   * 
-   <a href='http://173.255.116.17/rcarlesso/gcutil-listinstances-$PROJECT.txt'>Instances</a> 
-   <a href='http://173.255.116.17/rcarlesso/gcutil-listfirewalls-$PROJECT.txt'>Firewalls</a> 
-   <a href='http://173.255.116.17/rcarlesso/gcutil-getproject-$PROJECT.txt'>Project</a>
-   <a href='http://173.255.116.17/rcarlesso/gcutil-getproject-$PROJECT.json'>P.json</a>
-   <a href='http://173.255.116.17/rcarlesso/gcutil-listzones-$PROJECT.txt'>Zones</a> 
+   <a href='http://$IP/$ADMINUSER/gcutil-listinstances-$ADDON.txt'>Instances</a> 
+   <a href='http://$IP/$ADMINUSER/gcutil-listfirewalls-$PROJECT.txt'>Firewalls</a> 
+   <a href='http://$IP/$ADMINUSER/gcutil-getproject-$PROJECT.txt'>Project</a>
+   <a href='http://$IP/$ADMINUSER/gcutil-getproject-$PROJECT.json'>P.json</a>
+   <a href='http://$IP/$ADMINUSER/gcutil-listzones-$PROJECT.txt'>Zones</a> 
   <br/>
 
   <h3>Custom metadata</h3>
 
-  
   <p>Host-peculiar metadata: <b>$METADATA</b>
   <p>hostname: <b>$HOSTNAME</b>
+  <p>addon: <b>$ADDON</b>
   <p>Project description: <pre>"$(curl http://metadata/0.1/meta-data/attributes/description )"</pre>
 
 </body></html>
