@@ -10,11 +10,13 @@
 #
 # gcutil addinstance INSTANCENAME
 #
+# Note this only work with debian/ubuntu based distros.
 ###########################################################################################
 
 VER=1.3.9
 
 FIRST_BOOT_HISTORY='
+20131014 1.4.0  riccardo Starting to integrate with new GitHub repo. Adding dynamic $BUCKET
 20120924 1.3.9  riccardo sakura bin is now executable also by normal users 
 20120924 1.3.8  riccardo gsutil-downloading /opt/google/lib/include.bash
 20120924 1.3.7  riccardo Added /opt/google/bin/ to PATH and /o/g/lib/
@@ -51,13 +53,16 @@ GEM_POST_OPTS=' --no-ri --no-rdoc'
 # rubygems-update : allows rubygems to go over 1.3.5 on old Ubuntu..
 ADMIN_EMAIL=palladiusbonton@gmail.com
 # TODO peek from METADATA!
-GOOGLE_USER=rcarlesso  
+ADMIN_USER=rcarlesso
  # TODO take it from metadata
 BASH_PREAMBLE='# This file was created by common-startup-script.sh. Edit at your own risk
 # At next reboot, it *should* be overwritten again (but nowe its not yet maybe a bug in documentation?)'
 
 METADATA=$(curl http://metadata/0.1/meta-data/attributes/startup-metadata)
 PROJECT=$( echo "$METADATA" | cut -f 2 -d: )
+BUCKET=$( curl http://metadata/0.1/meta-data/attributes/mybucket )
+ADDON=`cat /opt/google/PROJECT`
+ADDON2=`cat /opt/google/ADDON`
 
 
 ############################################
@@ -127,9 +132,9 @@ ALIASES_EOF
 cp ~/.bash_aliases ~rcarlesso/.bash_aliases
 chown    rcarlesso ~rcarlesso/.bash_aliases
 
-if [ -f /home/$GOOGLE_USER/ ] ; then
-  cp ~/.bash_aliases ~$GOOGLE_USER/.bash_aliases
-  chown $GOOGLE_USER ~$GOOGLE_USER/.bash_aliases
+if [ -f /home/$ADMIN_USER/ ] ; then
+  cp ~/.bash_aliases ~$ADMIN_USER/.bash_aliases
+  chown $ADMIN_USER ~$ADMIN_USER/.bash_aliases
 fi
 
 #index which contains the Project name :)
@@ -196,7 +201,7 @@ EOF
 #############################################
 #Setting up /var/www/boot to scp files there
 mkdir -p /var/www/boot/ 
-chown -R $GOOGLE_USER
+chown -R $ADMIN_USER
 
 # OMG
 curl http://metadata/0.1/meta-data/description                 > /opt/google/MACHINE_DESCRIPTION
@@ -261,9 +266,9 @@ touch /root/03-end-of-common-startup-script-now-calling-custom.touch
 # Uses gsutil to download a file for itself. This is sooooo Puppety! :)
 # It cant work because there's no way (yet) to inject the key in the hosts
 ################################################################################################### 
-GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="gs://{{bucket}}/projects/`cat /opt/google/PROJECT`/host.$HOSTNAME.sh"
+GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$HOSTNAME.sh"
 LOCAL_PATH=/root/my-personal-init-script.sh
-gsutil cp gs://{{bucket}}/projects/_common/include.bash /opt/google/lib/include.bash &&
+gsutil cp $BUCKET/projects/_common/include.bash /opt/google/lib/include.bash &&
  gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH && 
   /bin/bash $LOCAL_PATH 1>/var/log/riccardo/host-script.out 2>/var/log/riccardo/host-script.err &&
     mv  $LOCAL_PATH "$LOCAL_PATH.executed-with-exit-$?" ||

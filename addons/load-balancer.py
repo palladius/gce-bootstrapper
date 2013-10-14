@@ -32,7 +32,7 @@ def main():
   p = ProjectInitiator(sys.argv[0])
 
   for hostname, description in names_and_desc:
-    yellow("Creating normal host %s ('%s')" % (hostname, description) )
+    # pyellow("Creating normal host %s ('%s')" % (hostname, description) )
     p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip'], metadata={ 'gclb-affinity': 'ip'})
   p.addinstance('prod', 'Testing a production machine', public_ip = public_ip, network = 'unartra', tags=['prod'], image='centos-6' , persistent_boot_disk=True )
 

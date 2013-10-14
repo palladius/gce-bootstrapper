@@ -4,7 +4,7 @@
 ##################################################
 
 from datetime   import datetime, date, time 
-from util       import deb, yellow, ptitle
+from util       import deb, pyellow, ptitle
 from subprocess import call
 
 import subprocess
@@ -42,9 +42,8 @@ def gcutil_addfirewall(p, name, description, additional_options):
   
   sorry for my lazyness  
   ''' 
-  command = '''gcutil addfirewall '%s' --project=%s --description='%s' \
-  %s ''' % (name, p.id, description, additional_options)
-  p.execute(command)
+  p.execute('''gcutil --project={} addfirewall {} --description='{}' {}'''.format(
+      p.id, name,  description, additional_options))
 
 def gcutil_addinstance(project, name, description, 
   public_ip = False,
@@ -106,7 +105,7 @@ def gcutil_addinstance(project, name, description,
 
   persistent_boot_disk_opts = '--persistent_boot_disk' if persistent_boot_disk else "--nopersistent_boot_disk"
   
-  metadata_addon = ' =TODO= '
+  metadata_addon = ''
   metadata.update(project.metadata())
   for k in metadata.keys():
     metadata_addon = "--metadata='{}:{}' ".format(k, metadata[k])
@@ -141,9 +140,8 @@ def gcutil_addinstance(project, name, description,
   )
 
 
-  command = '''gcutil addinstance --project %s '%s' --description='[%s] %s' \
-	%s \
-	''' % (project.project_id, name, project.name, description, addinstance_opts)
+  command = '''gcutil --project {} addinstance '{}' --description='[{}] {}' {}  '''.format(
+      project.project_id, name, project.addon, description, addinstance_opts)
   project.execute(command)
 
 def gcutil_adddisk(project,diskname, zone = None):
@@ -173,38 +171,28 @@ def gsutil_push_files_for_project(project):
   '''This functions pushes into my Google Storage all my per-machine init scripts.
   They are then pulled from init script...
   '''
-  ptitle("gsutil-pushing hosts scripts for {}".format(project.name()))
+  ptitle("gsutil-pushing hosts scripts for {}".format(project.addon()))
   # gsutil multithreaded
   cmd = """touch .placeholder.gsutil ; \
-    gsutil cp projects/riclib/scripts/include.bash {}/projects/_common/include.bash ; \
-    gsutil cp .placeholder {bucket}/projects/{project_name}/.placeholder ; \
-    gsutil -m cp projects/{project_name}.d/host.*.sh {bucket}/projects/{project_name}/ ; \
+    gsutil cp riclib/scripts/include.bash {}/addons/_common/include.bash ; \
+    gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder ; \
+    gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/ ; \
     rm .placeholder.gsutil""".format(
-      project_name=project.name,
+      addon=project.addon,
       bucket=project.default('bucket'),
     )
   p.execute(cmd)
 
 
 def common_pre(project):
-  print "Welcome to project '%s'" % project
-  # gsutil push stuff
+  pyellow("Pre installation: %s" % project)
   gsutil_push_files_for_project(project)
-  p.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
+  # Opening port 80.
+  project.execute('''gcutil --project={} addfirewall httpy --description="Incoming http on port 80 allowed in python lib" --allowed="tcp:http"'''.format(project.id))
 
-def gcutil_cmd(project,subcommand):
-  execute('gcutil --project=%s %s' % (project,subcommand) )
+# def gcutil_cmd(p,subcommand):
+#   p.execute('gcutil --project=%s %s' % (p.id,subcommand) )
 
-def common_post(project):
-  yellow("Post installation '%s'" % project)
-  # requires boot script version 1.2.13 or more:
-  # if there is a www host it pseudo puppetizes it :)
-  gcutil_cmd(project, ('push www projects/{}.d/host.*.sh /var/www/boot/'.format(project)) )
-  # the dir rcarlesso has been already created/rightowned with the init script :)
-  for host in ('www'):
-    gcutil_cmd(project, ('push {} ./var/gcutil-*txt ./var/gcutil-*json /var/www/rcarlesso/'.format(host)) ) # push project stuff there
-  
 def gcutil_setcommoninstancemetadata(project, arr_keys_values):
   pass
-
 

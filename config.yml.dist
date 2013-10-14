@@ -17,19 +17,20 @@ production:
   dryrun: True                                                        # Set to False to effectively make this execute gcutil commands (this is a security precaution)
   debug:  True
   defaults: 
-    zone:                 europe-west1-b
+    image:                debian-7                                    # or "centos-6", "debian-6", ...
     machine_type:         n1-standard-1
     network:              default
-    startup_script:       ./riclib/scripts/common-startup-script.sh
-    vm_prefix:            "test-provisioner-"                         # set to empty string or delete if you don't want this feature.
     persistent_boot_disk: True                                        # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
-    image:                debian-7                                    # or "centos-6", "debian-6", ...
+    startup_script:       ./riclib/scripts/common-startup-script.sh
     tags:                                                             # Use this to set additional tags for every VM in project
     - foobar
     - useful_to_delete_me
+    vm_prefix:            "test-provisioner-"                         # set to empty string or delete if you don't want this feature.
+    zone:                 europe-west1-b
   admin:
     email: YOUREMAIL_HERE@example.com
     name:  NAME SURNAME
+    username: LINUX_USERNAME                                          # no spaces
   metadata:
     # Use to set Project-wide metadata. Dont use spaces in keys.
     password: Y0u11n3v3rGu3ss

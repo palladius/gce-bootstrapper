@@ -14,19 +14,19 @@ import riclib
 from riclib.util import deb, debug_app
 
 defaults = {
-  'project_dir':  './projects/',
-  'yaml_file':    'config.yml',
+  'addon_dir':  './addons/',
+  'yaml_file':  'config.yml',
 }
 
 
-def valid_projects(projects_dir=defaults['project_dir']):
+def valid_projects(addons_dir=defaults['addon_dir']):
   '''Returns a list of valid projects.
 
   That is taken from files: "projects/*.addon"
 
   '''
   project_list = []
-  dirList=os.listdir(projects_dir)
+  dirList=os.listdir(addons_dir)
   for fname in dirList:
     m = re.search('(.*)\.(bash|py)$',fname)
     if m:
@@ -34,29 +34,29 @@ def valid_projects(projects_dir=defaults['project_dir']):
   return project_list
 
 def usage():
-  print 'Usage: %s v%s <PROJECT_NAME>' % (sys.argv[0], script_ver)
-  print 'Projects: ', ', '.join(valid_projects())
+  print 'Usage: %s v%s <ADDON_NAME>' % (sys.argv[0], script_ver)
+  print 'Addons: ', ', '.join(valid_projects())
   exit(1)
 
-def bootstrap_project(project_name, config, projects_dir=defaults['project_dir']):
+def bootstrap_project(addon, config, addons_dir=defaults['addon_dir']):
   '''Bootstraps a project.
 
   For a project to be valid, it has to have
 
   '''
-  if not(project_name in valid_projects()):
-    print "Invalid project: " , project_name
+  if not(addon in valid_projects()):
+    print "Invalid project: " , addon
     exit(2)
-  deb("Valid bootstrap project: %s" % project_name)
-  deb("Project Dir: %s" % projects_dir)
+  deb("Valid bootstrap project: %s" % addon)
+  deb("Project Dir: %s" % addons_dir)
   deb("Projects: " + ', '.join(valid_projects()) )
-  bash_filename = projects_dir + project_name + ".bash"
+  bash_filename = addons_dir + addon + ".bash"
   if os.path.exists(bash_filename):   # i.e.: 'projects/sakura.sh'
     # Execute the common before, the addon and the common after!
-    os.system("PROJECT_DIR='%s' bash projects/%s.addon" % (project_name,project_name))
+    os.system("addon_dir='%s' bash addon/%s.addon" % (addon,addon))
     print "Bash Script executed. "
   # search for python as well
-  python_filename = projects_dir + project_name + ".py"
+  python_filename = addons_dir + addon + ".py"
   deb("Looking for py: {}".format(python_filename))
   if os.path.exists(python_filename):   # i.e.: 'projects/sakura.py'
     deb("Great! executing python as well: {}".format(python_filename))

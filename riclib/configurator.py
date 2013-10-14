@@ -11,9 +11,9 @@ import yaml
 from util import deb
 
 default_ymlfile = './config.yml' # here we are one dir below :)
-mandatory_fields = ['project_id', 'bucket', 'metadata', 'admin', 'defaults', 'dryrun']
+mandatory_fields = ['project_id', 'bucket', 'metadata', 'admin', 'defaults', 'dryrun', 'debug']
 mandatory_secondary_fields = {
-  'admin':    ['email', 'name'],
+  'admin':    ['email', 'name', 'username'],
   'defaults': ['zone', 'machine_type', 'network', 'image', 'vm_prefix', ],
 }
 
