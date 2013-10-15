@@ -54,6 +54,7 @@ def gcutil_addinstance(project, name, description,
   disks = [] ,
   image = None,
   metadata = {},
+  service_account_scopes = None,
   persistent_boot_disk = False,
   additional_options = ''
   ):
@@ -88,6 +89,9 @@ def gcutil_addinstance(project, name, description,
 
   date = str(datetime.now())
 
+  if service_account_scopes is None:
+    service_account_scopes = project.default('service_account_scopes')
+
   metadata['original-vm-name'] = name         # without prefix
   name = project.default('vm_prefix') + name
 
@@ -111,6 +115,7 @@ def gcutil_addinstance(project, name, description,
 
   addinstance_opts = """--tags='{tags}' \
   --zone='{zone}' \
+  --service_account_scopes='{service_account_scopes}' \
   --machine_type='{mt}' \
   --metadata_from_file=startup-script:{startup} \
   --metadata=startup-metadata:project:{project_id}:maybeIssuesWithNumbers \
@@ -136,6 +141,7 @@ def gcutil_addinstance(project, name, description,
     persistent_boot_disk_opts=persistent_boot_disk_opts,
     additional_options=additional_options, 
     metadata_addon=metadata_addon,
+    service_account_scopes=','.join(service_account_scopes),
   )
 
   command = '''gcutil --project {} addinstance '{}' --description='[{}] {}' {}  '''.format(

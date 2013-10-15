@@ -41,7 +41,7 @@ def main():
   ]
   region = p.default('region')
   prefix = p.default("vm_prefix")
-  instance_names = [ prefix+host for [host,desc] in names_and_desc] # => "prefix-web1", "prefix-web2", ..
+  instance_names = [ prefix+host for [host,desc,whatevs] in names_and_desc] # => "prefix-web1", "prefix-web2", ..
 
 
   #######################################
@@ -74,15 +74,14 @@ def main():
     )
   )
 
-   #    gcutil --project=<project-id> addhttphealthcheck <health-check-name> \
-                   --check_interval_sec=<interval-in-secs>
-                   --check_timeout_sec=<timeout-secs> \
-                                   --description=<description>
-                                   --healthy_threshold=<healthy-threshold> \
-                                                   --unhealthy_threshold=<unhealthy-threshold>
-                                                   --host=<host> \
-                                                                   --request_path=<path>
-                                                                   --port=<port>
+  p.gcutil_cmd("""addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html""")
+       # --check_interval_sec=<interval-in-secs>
+       # --check_timeout_sec=<timeout-secs> \
+       # --healthy_threshold=<healthy-threshold> \
+       # --unhealthy_threshold=<unhealthy-threshold>
+       # --host=<host> \
+       # --request_path=<path>
+       # --port=<port>
   # Firewalls
   p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
   p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(

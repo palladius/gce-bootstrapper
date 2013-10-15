@@ -2,20 +2,19 @@
 
 ###########################################################################################
 # Riccardo startup script for his machines. Use at your own risk!
+#
 # Startup Script, see here: https://developers.google.com/compute/docs/howtos/startupscript
 # This script shouldnt substitute Puppet/Chef! Dont make it too complicated! Ideally you
-# should just get it up and running and autoconfigurable from Puppet/Chef/whatever
+# should just get it up and running and autoconfigurable from Puppet/Chef/whatever.
 #
-# to call this script, you just call
-#
-# gcutil addinstance INSTANCENAME
-#
-# Note this only work with debian/ubuntu based distros.
+# Note. This only work with debian-based distros.
 ###########################################################################################
 
-VER=1.5.0
+VER="1.5.1a"
+TIMEZONE='Europe/Dublin'
 
 FIRST_BOOT_HISTORY='
+20131015 1.5.1  riccardo Timezone. Removed BOTO which was insecure and added to code. Set -e at the end to better debug stuff.
 20131014 1.5.0  riccardo more secure, removed custom disk script and apache2 personal stuff :)
 20131014 1.4.2  riccardo Using depured VM hostname, so now should retrieve correctly from gsutil.
 20131014 1.4.1  riccardo Copying this script to /root/
@@ -146,8 +145,8 @@ cat <<ALIASES_EOF > ~/.bash_aliases
 ALIASES_EOF
 
 # copying the same for rcarlesso user
-cp ~/.bash_aliases ~rcarlesso/.bash_aliases
-chown    rcarlesso ~rcarlesso/.bash_aliases
+cp ~/.bash_aliases /home/$ADMIN_USER/.bash_aliases
+chown $ADMIN_USER /home/$ADMIN_USER/.bash_aliases
 
 if [ -f /home/$ADMIN_USER/ ] ; then
   cp ~/.bash_aliases ~$ADMIN_USER/.bash_aliases
@@ -163,9 +162,10 @@ cat <<WWW_EOF > /var/www/index-bootsy.html
 
   <h3>Custom metadata</h3>
 
-  <p>Host-peculiar metadata: <b>$METADATA</b>
-  <p>hostname: <b>$HOSTNAME</b>
-  <p>Addon: <b>$ADDON</b>
+  <p>Host-peculiar metadata: <b>$METADATA</b><br>
+  <p>hostname: <b>$HOSTNAME</b><br>
+  <p>Addon: <b>$ADDON</b> <br>
+  <p>VER: <b>$VERSION</b> <br>
   <p>Project description: <pre>"$(curl http://metadata/0.1/meta-data/attributes/description )"</pre>
 
 </body></html>
@@ -173,27 +173,11 @@ WWW_EOF
 
 ############################################################################
 # Sets 'gsutil' authentication!
-#
-# Note: potentially vulnerable!!! do sth better TODO @security
 ############################################################################
-cat << BOTO_EOF > /root/.boto
-# $BASH_PREAMBLE
-[Credentials]
-gs_oauth2_refresh_token = _YOUR_CONFIG_HERE
-[Boto]
-https_validate_certificates = True
-[GSUtil]
-default_api_version = 2
-default_project_id = $PROJECT_ID
-[OAuth2]
-BOTO_EOF
 
-cp /root/.boto  ~$ADMIN_USER/.boto
-chown $ADMIN_USER ~$ADMIN_USER/.boto
+echo $TIMEZONE >/etc/timezone
 
-echo Europe/Dublin > /etc/timezone
-
-mkdir -p /opt/google/bin /opt/google/sbin /opt/google/lib /opt/google/etc /opt/google/tmp /var/log/riccardo/  /var/www/$ADMIN_USER
+mkdir -p /opt/google/bin /opt/google/sbin /opt/google/lib /opt/google/etc /opt/google/tmp /var/log/gce-bootstrapper/  /var/www/$ADMIN_USER
 chown $ADMIN_USER /var/www/$ADMIN_USER/
 
 ln -s /opt/google /root/google
@@ -230,9 +214,6 @@ cd /root/ &&
    git clone git://github.com/palladius/sakura &&
      cat /root/git/sakura/templates/bashrc.inject >> /root/.bashrc
 
-      touch /root/errors-retrieving-hostbased-init-script-w-gsutil.touch
-
-# removed format disks by riccardo: there is one officially mantained by Google now.
 
 chmod 755  /root/ /root/git /root/git/sakura /root/git/sakura/bin
 
@@ -248,11 +229,21 @@ touch /root/03-end-of-common-startup-script-now-calling-custom.touch
 ################################################################################################### 
 GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$DEPURED_VM.sh"
 LOCAL_PATH=/root/my-personal-init-script.sh
-gsutil cp $BUCKET/projects/_common/include.bash /opt/google/lib/include.bash &&
- gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH && 
-  /bin/bash $LOCAL_PATH 1>/var/log/riccardo/host-script.out 2>/var/log/riccardo/host-script.err &&
-    mv  $LOCAL_PATH "$LOCAL_PATH.executed-with-exit-$?" ||
-      touch /root/errors-retrieving-hostbased-init-script-w-gsutil.touch
+
+set -e
+#statements
+gsutil cp $BUCKET/projects/_common/include.bash /opt/google/lib/include.bash
+
+touch /root/03a-ok-gsutil-cp-include.touch
+
+gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH
+touch /root/03b-ok-gsutil-cp-hostspecific.touch
+
+/bin/bash $LOCAL_PATH 1>/var/log/gce-bootstrapper/host-script.out 2>/var/log/gce-bootstrapper/host-script.err
+touch /root/03c-ok-execute-hostspecific-script.touch
+
+mv  $LOCAL_PATH "$LOCAL_PATH.executed-with-exit-$?" ||
+  touch /root/errors-retrieving-hostbased-init-script-w-gsutil.touch
 
 touch /root/04-succesfully-launched-custom-script-$PROJECT-$HOSTNAME.touch
 

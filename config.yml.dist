@@ -21,6 +21,12 @@ production:
     machine_type:         n1-standard-1
     network:              default
     persistent_boot_disk: True                                        # uses a Persistent disk (enouraged). Set to False to get a Scratch Disk.
+    service_account_scopes:
+    - bigquery
+    - cloudsql
+    - compute-ro              # or: compute-rw, 
+    - storage-ro              # or: storage-full, storage-rw, storage-wo
+    #- taskqueue
     startup_script:       ./riclib/scripts/common-startup-script.sh
     tags:                                                             # Use this to set additional tags for every VM in project
     - foobar

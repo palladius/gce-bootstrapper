@@ -14,7 +14,7 @@ default_ymlfile = './config.yml' # here we are one dir below :)
 mandatory_fields = ['project_id', 'bucket', 'metadata', 'admin', 'defaults', 'dryrun', 'debug']
 mandatory_secondary_fields = {
   'admin':    ['email', 'name', 'username'],
-  'defaults': ['zone', 'machine_type', 'network', 'image', 'vm_prefix', ],
+  'defaults': ['zone', 'machine_type', 'network', 'image', 'vm_prefix', 'service_account_scopes', ],
 }
 
 def getConfigYaml(ymlfile=default_ymlfile):

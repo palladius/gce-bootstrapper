@@ -15,7 +15,9 @@ def debug_app():
 
 ############################################
 # String stuff
+def yellow(str):
+  return "\033[1;33m{}\033[0m".format(str)
 def pyellow(str):
-  print "\033[1;33m%s\033[0m" % str
+  print yellow(str)
 def ptitle(str):
   print "\033[1;37m= %s =\033[0m" % str

@@ -11,7 +11,7 @@ import os
 import re
 
 import riclib
-from riclib.util import deb, debug_app
+from riclib.util import deb, debug_app, yellow
 
 defaults = {
   'addon_dir':  './addons/',
@@ -35,7 +35,7 @@ def valid_projects(addons_dir=defaults['addon_dir']):
 
 def usage():
   print 'Usage: %s v%s <ADDON_NAME>' % (sys.argv[0], script_ver)
-  print 'Addons: ', ', '.join(valid_projects())
+  print 'Addons: ', yellow(' '.join(valid_projects()))
   exit(1)
 
 def bootstrap_project(addon, config, addons_dir=defaults['addon_dir']):
