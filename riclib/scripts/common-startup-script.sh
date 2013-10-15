@@ -10,7 +10,7 @@
 # Note. This only work with debian-based distros.
 ###########################################################################################
 
-VER="1.5.1a"
+VER="1.5.1bugfix"
 TIMEZONE='Europe/Dublin'
 
 FIRST_BOOT_HISTORY='
@@ -231,8 +231,9 @@ GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$DEPURED_VM.sh"
 LOCAL_PATH=/root/my-personal-init-script.sh
 
 set -e
+set -x
 #statements
-gsutil cp $BUCKET/projects/_common/include.bash /opt/google/lib/include.bash
+gsutil cp $BUCKET/addons/_common/include.bash /opt/google/lib/include.bash
 
 touch /root/03a-ok-gsutil-cp-include.touch
 

@@ -9,7 +9,7 @@ import riclib
 from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
-version = '1.4'
+version = '1.5'
 
 def main():
   """Demonstrating Affinity.
@@ -30,6 +30,8 @@ def main():
   #######################################
   # Configuration
   #######################################
+  add_firewall_rules = False
+  add_machines = True
   public_ip = True
   # dig +short $(hostname)
   resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
@@ -47,48 +49,48 @@ def main():
   #######################################
   # Commands
   #######################################
-  # Creating Target Pools
-  p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-no    --region {region} --description 'TP affinity: None'  --session_affinity NONE".format(region=region, prefix=prefix))
-  p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --session_affinity CLIENT_IP".format(region=region, prefix=prefix))
-  p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-proto --region {region} --description 'TP affinity: Proto' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix))
 
+  # Creates machines
+  if add_machines:
+    for hostname, description,color in names_and_desc:
+      p.addinstance(hostname, description, 
+        public_ip = public_ip,
+        tags=['affinity-ip', ], 
+        metadata={
+          'gclb-affinity': 'of some kind (depends on TP/FR)',
+          'bgcolor': color, # this goes into the Apache code
+        },
+      )
 
-  for hostname, description,color in names_and_desc:
-    p.addinstance(hostname, description, 
-      public_ip = public_ip,
-      tags=['affinity-ip', ], 
-      metadata={
-        'gclb-affinity': 'of some kind (depends on TP/FR)',
-        'bgcolor': color, # this goes into the Apache code
-      },
+  # Plays with firewalls
+  if add_firewall_rules:
+    # Creating Target Pools
+    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-no    --region {region} --description 'TP affinity: None'  --session_affinity NONE".format(region=region, prefix=prefix))
+    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --session_affinity CLIENT_IP".format(region=region, prefix=prefix))
+    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-proto --region {region} --description 'TP affinity: Proto' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix))
+
+    # GCLB stuff
+    p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
+    p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-ip".format(prefix=prefix))
+    #p.addforwardingrule('{prefix}bootsy-fr-aff-proto', target="{prefix}bootsy-tp-aff-proto".format(prefix=prefix))
+
+    p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(
+      instances=','.join(instance_names),
+      prefix=prefix,
+      )
     )
-
-  # GCLB stuff
-  p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
-  p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-ip".format(prefix=prefix))
-  #p.addforwardingrule('{prefix}bootsy-fr-aff-proto', target="{prefix}bootsy-tp-aff-proto".format(prefix=prefix))
-
-  p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(
-    instances=','.join(instance_names),
-    prefix=prefix,
-    )
-  )
-
-  p.gcutil_cmd("""addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html""")
-       # --check_interval_sec=<interval-in-secs>
-       # --check_timeout_sec=<timeout-secs> \
-       # --healthy_threshold=<healthy-threshold> \
-       # --unhealthy_threshold=<unhealthy-threshold>
-       # --host=<host> \
-       # --request_path=<path>
-       # --port=<port>
-  # Firewalls
-  p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
-  p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
-    resticted_ips))
-
-  # sleep 2 secs
-  # re-add with instance names...
+    p.gcutil_cmd('addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html')
+         # --check_interval_sec=<interval-in-secs>
+         # --check_timeout_sec=<timeout-secs> \
+         # --healthy_threshold=<healthy-threshold> \
+         # --unhealthy_threshold=<unhealthy-threshold>
+         # --host=<host> \
+         # --request_path=<path>
+         # --port=<port>
+    # Firewalls
+    p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
+    p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
+      resticted_ips))
 
 
 if __name__ == "__main__":
