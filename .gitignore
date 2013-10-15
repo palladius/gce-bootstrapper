@@ -2,3 +2,4 @@ bitbucket/
 myconfig.py
 config.yml
 *.pyc
+out/*.out

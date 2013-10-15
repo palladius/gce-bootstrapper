@@ -36,10 +36,10 @@ def main():
   # dig +short $(hostname)
   resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
   names_and_desc = [
-    ["web1", 'Webserver 1 to demonstrate Load Balancing', 'red' ],
-    ["web2", 'Webserver 2 to demonstrate Load Balancing', 'blue' ],
-    ["web3", 'Webserver 3 to demonstrate Load Balancing', 'yellow' ],
-    ["web4", 'Webserver 4 to demonstrate Load Balancing', 'green' ],
+    ["www1", 'Webserver 1 to demonstrate Load Balancing', 'red' ],
+    ["www2", 'Webserver 2 to demonstrate Load Balancing', 'blue' ],
+    ["www3", 'Webserver 3 to demonstrate Load Balancing', 'yellow' ],
+    ["www4", 'Webserver 4 to demonstrate Load Balancing', 'green' ],
   ]
   region = p.default('region')
   prefix = p.default("vm_prefix")

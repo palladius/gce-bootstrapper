@@ -237,6 +237,8 @@ gsutil cp $BUCKET/addons/_common/include.bash /opt/google/lib/include.bash
 
 touch /root/03a-ok-gsutil-cp-include.touch
 
+echo gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH > /root/03b-before.log
+
 gsutil cp "$GSTORAGE_HOST_SPECIFIC_SCRIPT_URL" $LOCAL_PATH
 touch /root/03b-ok-gsutil-cp-hostspecific.touch
 
