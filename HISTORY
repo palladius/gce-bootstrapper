@@ -1,3 +1,5 @@
+0.9.6: 20131015 Finally it works as 1yr ago! Took a while. And it's secure
+                (removed my .boto and added serious auth)
 0.9.5: 20131015 Adding debug. Moving gsutil to default(bucket)
 0.9.4: 20131015 Added FWDing rules for firewalls.
 0.9.3: 20131014 Refactored everything now it finally spins up machines.
