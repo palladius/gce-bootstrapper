@@ -9,7 +9,7 @@ import riclib
 from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
-version = '1.5'
+version = '1.5a'
 
 def main():
   """Demonstrating Affinity.
@@ -24,13 +24,22 @@ def main():
     (default: 'NONE')
 
 
+    gcutil addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html
+         # --check_interval_sec=<interval-in-secs>
+         # --check_timeout_sec=<timeout-secs> \
+         # --healthy_threshold=<healthy-threshold> \
+         # --unhealthy_threshold=<unhealthy-threshold>
+         # --host=<host> \
+         # --request_path=<path>
+         # --port=<port>
+
   """
   p = ProjectInitiator(sys.argv[0]) # needed also for conf :/
 
   #######################################
   # Configuration
   #######################################
-  add_firewall_rules = False
+  add_firewall_rules = True
   add_machines = True
   public_ip = True
   # dig +short $(hostname)
@@ -80,13 +89,7 @@ def main():
       )
     )
     p.gcutil_cmd('addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html')
-         # --check_interval_sec=<interval-in-secs>
-         # --check_timeout_sec=<timeout-secs> \
-         # --healthy_threshold=<healthy-threshold> \
-         # --unhealthy_threshold=<unhealthy-threshold>
-         # --host=<host> \
-         # --request_path=<path>
-         # --port=<port>
+
     # Firewalls
     p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
     p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
