@@ -32,12 +32,12 @@ def main():
   #######################################
   public_ip = True
   # dig +short $(hostname)
-  resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4'  
+  resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
   names_and_desc = [
-    ["web1", 'Webserver 1 to demonstrate Load Balancing' ],
-    ["web2", 'Webserver 2 to demonstrate Load Balancing' ],
-    ["web3", 'Webserver 3 to demonstrate Load Balancing' ],
-    ["web4", 'Webserver 4 to demonstrate Load Balancing' ],
+    ["web1", 'Webserver 1 to demonstrate Load Balancing', 'red' ],
+    ["web2", 'Webserver 2 to demonstrate Load Balancing', 'blue' ],
+    ["web3", 'Webserver 3 to demonstrate Load Balancing', 'yellow' ],
+    ["web4", 'Webserver 4 to demonstrate Load Balancing', 'green' ],
   ]
   region = p.default('region')
   prefix = p.default("vm_prefix")
@@ -51,10 +51,17 @@ def main():
   p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-no    --region {region} --description 'TP affinity: None'  --session_affinity NONE".format(region=region, prefix=prefix))
   p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --session_affinity CLIENT_IP".format(region=region, prefix=prefix))
   p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-proto --region {region} --description 'TP affinity: Proto' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix))
-  
 
-  for hostname, description in names_and_desc:
-    p.addinstance(hostname, description, public_ip = public_ip, tags=['affinity-ip', ], metadata={'gclb-affinity': 'of some kind (depends on TP/FR)'})
+
+  for hostname, description,color in names_and_desc:
+    p.addinstance(hostname, description, 
+      public_ip = public_ip,
+      tags=['affinity-ip', ], 
+      metadata={
+        'gclb-affinity': 'of some kind (depends on TP/FR)',
+        'bgcolor': color, # this goes into the Apache code
+      },
+    )
 
   # GCLB stuff
   p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
@@ -67,6 +74,15 @@ def main():
     )
   )
 
+   #    gcutil --project=<project-id> addhttphealthcheck <health-check-name> \
+                   --check_interval_sec=<interval-in-secs>
+                   --check_timeout_sec=<timeout-secs> \
+                                   --description=<description>
+                                   --healthy_threshold=<healthy-threshold> \
+                                                   --unhealthy_threshold=<unhealthy-threshold>
+                                                   --host=<host> \
+                                                                   --request_path=<path>
+                                                                   --port=<port>
   # Firewalls
   p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
   p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
