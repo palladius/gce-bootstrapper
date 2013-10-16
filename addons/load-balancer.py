@@ -40,13 +40,10 @@ def main():
   # Configuration
   #######################################
   actions = {
-     'add_machines': False,
-     'cleanup': True,
-     'add_firewall_rules': True,
+     'add_machines': True,
+     'cleanup': False,
+     'add_firewall_rules': False,
   }
-  
-  
-
   public_ip = True
   # dig +short $(hostname)
   resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
@@ -67,7 +64,7 @@ def main():
 
   if actions['cleanup']:
     # Cleanup target pools. Pity we don't have a listtargetpools with --format names :("
-     p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
+    p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
 
 
   # Creates machines

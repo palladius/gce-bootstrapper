@@ -72,17 +72,26 @@ def gcutil_addinstance(project, name, description,
   if (disks.__class__ != list):
     print "Sorry, I need a list for 'disks', not a %s" % (tags.__class__)
     exit(1)
-  if not machine_type:
+  if machine_type is None:
     machine_type = project.default('machine_type')
-  if not image:
+  if image is None:
     image = project.default('image')
-  if not zone:
+  if zone is None:
     zone = project.default('zone')
-  if not network:
+  if network is None:
     network = project.default('network')
-  if not startup_script:
-    startup_script = project.default('startup_script')
 
+  if startup_script is None:
+     # Check if there is a file called DIRECT, if not, it will opt for storage and do nothing (common-startuip-script takes care of it)
+     direct_file_path = './addons/{addon}.d/direct.{vmname}.sh'.format(addon=project.addon, vmname=name)
+     if os.path.isfile(direct_file_path):
+       #print "\n\n   File found! DEBUG: using it instead: ", direct_file_path
+       startup_script = direct_file_path
+     else:
+       #pyellow("NOT FOUND LOCALLY: "+direct_file_path)
+       startup_script = project.default('startup_script')
+    
+  
   # Using sets to guarantee unicity, then moving back to array
   all_tags = set(tags)
   all_tags.update(project.default('tags'))
@@ -95,7 +104,7 @@ def gcutil_addinstance(project, name, description,
     service_account_scopes = project.default('service_account_scopes')
 
   metadata['original-vm-name'] = name         # without prefix
-  name = project.default('vm_prefix') + name
+  prefixed_name = project.default('vm_prefix') + name
 
   # Addons...
   public_ip_addon = '--external_ip_address=ephemeral' if public_ip == True else '--external_ip_address=none'
@@ -147,7 +156,7 @@ def gcutil_addinstance(project, name, description,
   )
 
   command = '''gcutil --project {} addinstance '{}' --description='[{}] {}' {}  '''.format(
-      project.project_id, name, project.addon, description, addinstance_opts)
+      project.project_id, prefixed_name, project.addon, description, addinstance_opts)
   project.execute(command)
 
 def gcutil_adddisk(project,diskname, zone = None):
