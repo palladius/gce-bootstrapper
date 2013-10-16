@@ -7,7 +7,6 @@ TODO(ricc): move all gcutil commands from gcutil_wrapper to here. I started with
             and it works pretty well. Ideally, move gcutil_addinstance, the rest is easy.
 """
 
-
 from gcutil_wrapper import *
 
 import re
@@ -110,7 +109,7 @@ class ProjectInitiator:
       # TODO(ricc): if placeholder, then wait indefinitely.
       "gsutil cp riclib/scripts/include.bash {bucket}/addons/_common/include.bash", # common includes
       "gsutil cp .placeholder {bucket}/addons/{addon}/.placeholder",                # to create the "directory", remember these are objects
-      "gsutil -m cp addons/{addon}.d/host.*.sh {bucket}/addons/{addon}/",
+      "gsutil -m cp addons/{addon}.d/storage.*.sh {bucket}/addons/{addon}/",
       "rm .placeholder.gsutil",
     ]
     for cmd in cmds:

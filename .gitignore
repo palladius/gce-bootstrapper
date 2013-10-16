@@ -3,3 +3,9 @@ myconfig.py
 config.yml
 *.pyc
 out/*.out
+config.yml.*
+*.swp
+# bergonzonian
+t
+t.*
+*~

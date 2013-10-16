@@ -10,9 +10,11 @@ from subprocess import call
 import subprocess
 import os
 
-lib_ver_common         = '1.1.2'
+lib_ver_common  = '1.1.3'
 
 lib_ver_history = '''
+20131016 1.1.3 Moving to storage. instead of host. 
+               (TODO going to honor the "direct.$HOST.sh" file if it exists)
 20131015 1.1.2 Added 'original-vm-name' metadata
 20131014 1.1.1 moving stuff to Project, like execute()
 20131013 1.1.0 methods now take a project object always.

@@ -10,10 +10,11 @@
 # Note. This only work with debian-based distros.
 ###########################################################################################
 
-VER="1.5.1bugfix"
+VER="1.5.2"
 TIMEZONE='Europe/Dublin'
 
 FIRST_BOOT_HISTORY='
+20131016 1.5.6  riccardo Changing "host ." to "storage."
 20131015 1.5.1  riccardo Timezone. Removed BOTO which was insecure and added to code. Set -e at the end to better debug stuff.
 20131014 1.5.0  riccardo more secure, removed custom disk script and apache2 personal stuff :)
 20131014 1.4.2  riccardo Using depured VM hostname, so now should retrieve correctly from gsutil.
@@ -56,7 +57,8 @@ function getmetadata() {
 ###########################################
 # Configuration stuff
 # apt-get install stuff
-INSTALLANDA_PACKAGES='apache2 git vim facter puppet etckeeper make rubygems ruby sendmail netcat netcat6 iperf nmap cowsay links'
+INSTALLANDA_PACKAGES='apache2 git vim  etckeeper make rubygems ruby sendmail netcat  cowsay links'
+INSTALLANDA_AFTER='puppet facter netcat6 iperf nmap'
 REMOVANDA_PACKAGES='nano emacs'
 GEMS_INSTALLANDA='ric rubygems-update' # rump 
 GEM_POST_OPTS=' --no-ri --no-rdoc'
@@ -153,6 +155,9 @@ if [ -f /home/$ADMIN_USER/ ] ; then
   chown $ADMIN_USER ~$ADMIN_USER/.bash_aliases
 fi
 
+# just to make sure Apache has been "patched" :)
+sed -i -e "s/works/gwoorks/g" /var/www/index.html
+
 #index which contains the Project name :)
 cat <<WWW_EOF > /var/www/index-bootsy.html
 <html><body>
@@ -227,7 +232,7 @@ touch /root/03-end-of-common-startup-script-now-calling-custom.touch
 # Uses gsutil to download a file for itself. This is sooooo Puppety! :)
 # It cant work because there's no way (yet) to inject the key in the hosts
 ################################################################################################### 
-GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/host.$DEPURED_VM.sh"
+GSTORAGE_HOST_SPECIFIC_SCRIPT_URL="$BUCKET/addons/$ADDON/storage.$DEPURED_VM.sh"
 LOCAL_PATH=/root/my-personal-init-script.sh
 
 set -e
@@ -253,4 +258,3 @@ touch /root/04-succesfully-launched-custom-script-$PROJECT-$HOSTNAME.touch
 echo Subject: I was installed | sendmail $ADMIN_EMAIL
 
 touch /root/05-end-of-common-startup-script-YOU_SHOULD_BE_GRAND.touch
-#wget http://www/boot/host.$(hostname).sh > /root/bootme-from-www-riccardo.sh

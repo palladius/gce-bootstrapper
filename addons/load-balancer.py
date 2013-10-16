@@ -67,7 +67,7 @@ def main():
 
   if actions['cleanup']:
     # Cleanup target pools. Pity we don't have a listtargetpools with --format names :("
-     p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | awk {'print $2'} | xargs gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
+     p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
 
 
   # Creates machines
