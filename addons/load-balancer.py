@@ -42,7 +42,7 @@ def main():
   actions = {
      'add_machines': True,
      'cleanup': False,
-     'add_firewall_rules': False,
+     'add_firewall_rules': True,
   }
   public_ip = True
   # dig +short $(hostname)
@@ -52,6 +52,7 @@ def main():
     ["www2", 'Webserver 2 to demonstrate Load Balancing', 'blue' ],
     ["www3", 'Webserver 3 to demonstrate Load Balancing', 'yellow' ],
     ["www4", 'Webserver 4 to demonstrate Load Balancing', 'green' ],
+    ["www5", 'Webserver 5 to demonstrate Load Balancing', 'brown' ],
   ]
   region = p.default('region')
   prefix = p.default("vm_prefix")
