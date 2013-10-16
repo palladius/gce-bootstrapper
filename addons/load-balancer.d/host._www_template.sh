@@ -4,7 +4,7 @@ VER=1.2
 
 apt-get install -y apache2
 
-COLOR=$(getmetadata color)
+#COLOR=$(getmetadata color)
 BGCOLOR=$(curl http://metadata/0.1/meta-data/attributes/bgcolor)
 
 echo "<html><body bgcolor='$BGCOLOR' ><h1>Welcome to $HOSTNAME</h1> Try also <a href='index2'.html >index2</a> or  <a href='index3'.html >index3</a> to test Session Affinity." > /var/www/index4.html

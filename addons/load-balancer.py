@@ -39,8 +39,14 @@ def main():
   #######################################
   # Configuration
   #######################################
-  add_firewall_rules = True
-  add_machines = True
+  actions = {
+     'add_machines': False,
+     'cleanup': True,
+     'add_firewall_rules': True,
+  }
+  
+  
+
   public_ip = True
   # dig +short $(hostname)
   resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
@@ -59,8 +65,13 @@ def main():
   # Commands
   #######################################
 
+  if actions['cleanup']:
+    # Cleanup target pools. Pity we don't have a listtargetpools with --format names :("
+     p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | awk {'print $2'} | xargs gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
+
+
   # Creates machines
-  if add_machines:
+  if actions['add_machines']:
     for hostname, description,color in names_and_desc:
       p.addinstance(hostname, description, 
         public_ip = public_ip,
@@ -72,16 +83,17 @@ def main():
       )
 
   # Plays with firewalls
-  if add_firewall_rules:
-    # Creating Target Pools
-    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-no    --region {region} --description 'TP affinity: None'  --session_affinity NONE".format(region=region, prefix=prefix))
-    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --session_affinity CLIENT_IP".format(region=region, prefix=prefix))
-    p.gcutil_cmd("addtargetpool {prefix}bootsy-tp-aff-proto --region {region} --description 'TP affinity: Proto' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix))
+  if actions['add_firewall_rules']:
 
-    # GCLB stuff
+    # GCLB: Target Pools
+    commasep_list = ','.join(instance_names)
+    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-no    --region {region} --description 'TP affinity: None'  --instances='{instances_list}' --session_affinity NONE".format(region=region, prefix=prefix,instances_list=commasep_list))
+    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --instances='{instances_list}' --session_affinity CLIENT_IP".format(region=region, prefix=prefix,instances_list=commasep_list))
+    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-proto --region {region} --description 'TP affinity: Proto' --instances='{instances_list}' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix,instances_list=commasep_list))
+
+    # GCLB: Forwarding Rules
     p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
     p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-ip".format(prefix=prefix))
-    #p.addforwardingrule('{prefix}bootsy-fr-aff-proto', target="{prefix}bootsy-tp-aff-proto".format(prefix=prefix))
 
     p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(
       instances=','.join(instance_names),
