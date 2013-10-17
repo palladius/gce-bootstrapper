@@ -3,7 +3,7 @@
 import sys                       
 import riclib
 
-from riclib.gcompute import *
+from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
 
@@ -16,7 +16,7 @@ print "cmd_folder: ", cmd_folder
 def main2():
   project = autodetect_project(sys.argv[0])
   common_pre(project)
-  gcompute_delinstances(project, ['test'] )                      # recreate it all the time
+  gcutil_delinstances(project, ['test'] )                      # recreate it all the time
   common_post(project)
  
 
@@ -37,15 +37,15 @@ def main():
   p.addfirewall('http80', 'Apache port 80', '--allowed=tcp:80' )
 
   # Adding disks
-  gcompute_adddisk(project, 'd2', )
-  #gcompute_adddisk(project, 'd1', zone = "some other zone")
+  gcutil_adddisk(project, 'd2', )
+  #gcutil_adddisk(project, 'd1', zone = "some other zone")
 
   # Adding instances
-  gcompute_addinstance(project, "nagios-ea", "Nagios zone my_zone_a",  public_ip = True, network=net, zone = my_zone_a, disk = 'nagios-ea', tags=['lampy'])
-  gcompute_addinstance(project, "nagios-eb", "Nagios zone my_zone_b",  public_ip = True, network=net, zone = my_zone_b, disk = 'nagios-eb', tags=['lampy'])
+  gcutil_addinstance(project, "nagios-ea", "Nagios zone my_zone_a",  public_ip = True, network=net, zone = my_zone_a, disk = 'nagios-ea', tags=['lampy'])
+  gcutil_addinstance(project, "nagios-eb", "Nagios zone my_zone_b",  public_ip = True, network=net, zone = my_zone_b, disk = 'nagios-eb', tags=['lampy'])
 
-  gcompute_addinstance(project, "www", "", public_ip = True) # you always need one
-  #gcompute_addinstance(project, "test", "test with four disks!", public_ip = True, disks = ['d1','d2','d3','d4'], zone = my_zone_b)
+  gcutil_addinstance(project, "www", "", public_ip = True) # you always need one
+  #gcutil_addinstance(project, "test", "test with four disks!", public_ip = True, disks = ['d1','d2','d3','d4'], zone = my_zone_b)
 
   p.addinstance('public-ror-septober', 'My RoR septober instance' , public_ip = True )
   p.addinstance('private-ricc-gloudia',  'Google Cloudia Desktop machine (personal stuff, dropbox and other linux stuff maybe X)' )

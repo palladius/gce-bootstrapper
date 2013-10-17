@@ -5,18 +5,30 @@
 
 script_ver = '0.9.4'
 
-
+# builtin
 import sys 
 import os
 import re
+import importlib
 
+# my libs
 import riclib
 from riclib.util import deb, debug_app, yellow
+
 
 defaults = {
   'addon_dir':  './addons/',
   'yaml_file':  'config.yml',
 }
+
+def init():
+  '''Initialization.'''
+  sys.path.append(os.path.abspath(defaults['addon_dir']))
+  sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+  #sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'addons')))
+  #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'addons')))
+  print "sys.path: ", sys.path
+
 
 
 def valid_projects(addons_dir=defaults['addon_dir']):
@@ -64,18 +76,24 @@ def bootstrap_project(addon, config, addons_dir=defaults['addon_dir']):
     module = (addons_dir + addon).strip("./").replace('/','.')
     try:
       # http://stackoverflow.com/questions/951124/dynamic-loading-of-python-modules/951678#951678
-      mod = __import__(module, fromlist=[])
-      print "DIR: ", dir(mod)
-      mod.DoSomething()
-    except Exception as e:
+      print "+ Module Name: ", module
+      importlib.import_module(module)
+      myaddon = __import__(module, fromlist=['main'])
+      print "+ mod: ", myaddon
+      print "+ DIR(mod): ", dir(myaddon)
+      myaddon.main()
+    except ImportError as e:
       print "Module '{}' not found: {}".format(module,e)
-      exit(11)
+    #except Exception as e:
+    #  print "Exception '{}' not found: {}".format(module,e)
+    #  exit(11)
     # ret = os.system("python %s" % python_filename)
     # print "Python Script executed. ret={}".format(ret)
     print "Program terminating.."
     exit(0)
 
 def main():
+  init()
   deb("ARGV: {}".format(sys.argv))
   if len(sys.argv) < 2:
     usage()

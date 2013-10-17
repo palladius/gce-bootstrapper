@@ -11,6 +11,12 @@ from riclib.project_initiator import *
 
 version = '1.6'
 
+class Bootsy():
+  def DoSomething(self):
+    print "Bootsy(): Im in the DoSomething() of GCLB: deleteme"
+
+
+
 def main():
   """Demonstrating Affinity in Load Balancer.
 
