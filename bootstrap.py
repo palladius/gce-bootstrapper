@@ -60,8 +60,20 @@ def bootstrap_project(addon, config, addons_dir=defaults['addon_dir']):
   deb("Looking for py: {}".format(python_filename))
   if os.path.exists(python_filename):   # i.e.: 'projects/sakura.py'
     deb("Great! executing python as well: {}".format(python_filename))
-    ret = os.system("python %s" % python_filename)
-    print "Python Script executed. ret={}".format(ret)
+    # TODO(ricc) Substitute this code with a dynamic import:
+    module = (addons_dir + addon).strip("./").replace('/','.')
+    try:
+      # http://stackoverflow.com/questions/951124/dynamic-loading-of-python-modules/951678#951678
+      mod = __import__(module, fromlist=[])
+      print "DIR: ", dir(mod)
+      mod.DoSomething()
+    except Exception as e:
+      print "Module '{}' not found: {}".format(module,e)
+      exit(11)
+    # ret = os.system("python %s" % python_filename)
+    # print "Python Script executed. ret={}".format(ret)
+    print "Program terminating.."
+    exit(0)
 
 def main():
   deb("ARGV: {}".format(sys.argv))
@@ -74,4 +86,6 @@ def main():
   print "Config.bucket:  {}".format(config['bucket'])
   bootstrap_project(sys.argv[1], config)
 
-main()
+
+if __name__ == "__main__":
+    main()

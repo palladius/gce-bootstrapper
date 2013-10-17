@@ -9,11 +9,10 @@ import riclib
 from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
-version = '1.5a'
+version = '1.6'
 
 def main():
-  """Demonstrating Affinity.
-
+  """Demonstrating Affinity in Load Balancer.
 
   $ gcutil help addtargetpool
   [..]
@@ -54,6 +53,11 @@ def main():
     ["www4", 'Webserver 4 to demonstrate Load Balancing', 'green' ],
     ["www5", 'Webserver 5 to demonstrate Load Balancing', 'brown' ],
   ]
+  affinities_and_nice_names = [
+      ['NONE',            'none',],
+      ['CLIENT_IP',       'ip'],
+      ['CLIENT_IP_PROTO', 'ipproto'],
+  ]
   region = p.default('region')
   prefix = p.default("vm_prefix")
   instance_names = [ prefix+host for [host,desc,whatevs] in names_and_desc] # => "prefix-web1", "prefix-web2", ..
@@ -73,7 +77,7 @@ def main():
     for hostname, description,color in names_and_desc:
       p.addinstance(hostname, description, 
         public_ip = public_ip,
-        tags=['affinity-test', ], 
+        tags=['affinity-test'], 
         metadata={
           'gclb-affinity': 'of some kind (depends on TP/FR)',
           'bgcolor': color, # this goes into the Apache code
@@ -89,30 +93,29 @@ def main():
     # GCLB: Target Pools
     commasep_instances_list = ','.join(instance_names)
     health_checks=[ 'bootsy-check80', ]
-    affinities_and_nice_names = [
-      ['NONE',              'none',],
-      ['CLIENT_IP',         'ip'],
-      ['CLIENT_IP_PROTO',   'ipproto'],
-    ]
     for affinity,aff_name in affinities_and_nice_names:
-      p.gcutil_cmd("addtargetpool {prefix}-tp-aff-{aff_name} --region {region} \
-                   --description 'TP with affinity: {affinity}'  --health_checks='{health_checks}' \
+      targetpool = "{prefix}-tp-aff-{aff_name}".format(prefix=prefix, aff_name=aff_name)
+      # GCLB: Adds 3 Target Pools, one for every
+      p.gcutil_cmd("addtargetpool {targetpool} --region {region} \
+                   --zone={zone} --description 'TP with affinity: {affinity}'  --health_checks='{health_checks}' \
                    --instances='{instances_list}' --session_affinity={affinity}".format(
                       region=region, prefix=prefix,
                       instances_list=commasep_instances_list,
+                      zone=p.default('zone'),
                       affinity=affinity,
                       aff_name=aff_name,
+                      targetpool=targetpool,
                       health_checks=','.join(health_checks)
                       )
+      )
+      # GCLB: 3 Forwarding Rules
+      p.addforwardingrule(
+          '{prefix}-fr-aff_{aff_name}'.format(prefix=prefix, aff_name=aff_name), 
+          target="{targetpool}".format(targetpool=targetpool),
       )
 
     # GCLB: Explicitly adds instances to the TP (in case you need it)
     #p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(instances=','.join(instance_names), prefix=prefix))
-
-    # GCLB: Forwarding Rules
-    p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix), target="{prefix}-tp-aff-no".format(prefix=prefix))
-    p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix), target="{prefix}-tp-aff-ip".format(prefix=prefix))
-
 
     # Firewalls
     p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-test' )
@@ -121,3 +124,6 @@ def main():
 
 if __name__ == "__main__":
   main()
+
+def DoSomething():
+  print "Im in the DoSomething() of GCLB: deleteme"

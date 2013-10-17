@@ -40,7 +40,7 @@ class DebugSingleton(object):
         if not cls._instance:
             cls._instance = super(DebugSingleton, cls).__new__(cls, *args, **kwargs)
             cls._instance._debug = cls._DEFAULT_DEBUG_VALUE
-            print "DebugSingleton created only once"
+            # print "DebugSingleton created only once"
         return cls._instance
 
     # classmethod
@@ -51,3 +51,5 @@ class DebugSingleton(object):
         if len(s) > 0 and self._debug:
           print "#DEB# {}".format(s)
 
+# call initializer
+DebugSingleton()
