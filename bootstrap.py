@@ -41,7 +41,7 @@ def valid_projects(addons_dir=defaults['addon_dir']):
   dirList=os.listdir(addons_dir)
   for fname in dirList:
     m = re.search('(.*)\.(bash|py)$',fname)
-    if m:
+    if m and not (fname == '__init__.py'):
       project_list.append(m.group(1))
   return project_list
 

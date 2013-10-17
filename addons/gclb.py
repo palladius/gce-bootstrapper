@@ -11,32 +11,16 @@ from riclib.project_initiator import *
 
 version = '1.6'
 
-class Bootsy():
-  def DoSomething(self):
-    print "Bootsy(): Im in the DoSomething() of GCLB: deleteme"
-
-
-
 def main():
   """Demonstrating Affinity in Load Balancer.
 
   $ gcutil help addtargetpool
   [..]
   --session_affinity: <NONE|CLIENT_IP|CLIENT_IP_PROTO>: Specifies the session affinity option for the connection. Options include:
-    NONE: connections from the same client IP may go to any VM in the target pool
+    NONE:      connections from the same client IP may go to any VM in the target pool
     CLIENT_IP: connections from the same client IP will go to the same VM in the target pool;
     CLIENT_IP_PROTO: connections from the same client IP with the same IP protocol will go to the same VM in the targetpool.
     (default: 'NONE')
-
-
-    gcutil addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html
-         # --check_interval_sec=<interval-in-secs>
-         # --check_timeout_sec=<timeout-secs> \
-         # --healthy_threshold=<healthy-threshold> \
-         # --unhealthy_threshold=<unhealthy-threshold>
-         # --host=<host> \
-         # --request_path=<path>
-         # --port=<port>
 
   """
   p = ProjectInitiator(sys.argv[0], run_pre_install=False) # needed also for conf :/
@@ -45,9 +29,10 @@ def main():
   # Configuration
   #######################################
   actions = {
-     'add_machines': True,
-     'cleanup': False,
-     'add_firewall_rules': True,
+     'add_machines':           True,
+     'add_firewall_rules':     True,
+     'add_loadbalancer_rules': True,
+     'cleanup':                False,
   }
   public_ip = True
   # dig +short $(hostname)
@@ -72,7 +57,6 @@ def main():
   #######################################
   # Commands
   #######################################
-
   if actions['cleanup']:
     # Cleanup target pools. Pity we don't have a listtargetpools with --format names :("
     p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
@@ -91,8 +75,7 @@ def main():
       )
 
   # Plays with firewalls
-  if actions['add_firewall_rules']:
-
+  if actions['add_loadbalancer_rules']:
     # GCLB: Helth Check
     p.gcutil_cmd('addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html')
 
@@ -100,9 +83,9 @@ def main():
     commasep_instances_list = ','.join(instance_names)
     health_checks=[ 'bootsy-check80', ]
     for affinity,aff_name in affinities_and_nice_names:
-      targetpool = "{prefix}-tp-aff-{aff_name}".format(prefix=prefix, aff_name=aff_name)
+      targetpool = "{prefix}tp-aff{aff_name}".format(prefix=prefix, aff_name=aff_name)
       # GCLB: Adds 3 Target Pools, one for every
-      p.gcutil_cmd("addtargetpool {targetpool} --region {region} \
+      ret = p.gcutil_cmd("addtargetpool {targetpool} --region {region} \
                    --zone={zone} --description 'TP with affinity: {affinity}'  --health_checks='{health_checks}' \
                    --instances='{instances_list}' --session_affinity={affinity}".format(
                       region=region, prefix=prefix,
@@ -114,6 +97,7 @@ def main():
                       health_checks=','.join(health_checks)
                       )
       )
+      print "This FwdRule should only do if previous RET worked. ret=",ret
       # GCLB: 3 Forwarding Rules
       p.addforwardingrule(
           '{prefix}-fr-aff_{aff_name}'.format(prefix=prefix, aff_name=aff_name), 
@@ -123,6 +107,7 @@ def main():
     # GCLB: Explicitly adds instances to the TP (in case you need it)
     #p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(instances=','.join(instance_names), prefix=prefix))
 
+  if actions['add_firewall_rules']:
     # Firewalls
     p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-test' )
     p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=www --allowed_ip_sources={}'.format(resticted_ips))
@@ -130,6 +115,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-
-def DoSomething():
-  print "Im in the DoSomething() of GCLB: deleteme"
