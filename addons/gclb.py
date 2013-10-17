@@ -34,6 +34,7 @@ def main():
      'add_loadbalancer_rules': True,
      'cleanup':                False,
   }
+  project_name = 'torino'
   public_ip = True
   # dig +short $(hostname)
   resticted_ips = '213.155.151.238,172.26.160.3,172.28.201.4,1.2.3.4' 
@@ -77,7 +78,8 @@ def main():
   # Plays with firewalls
   if actions['add_loadbalancer_rules']:
     # GCLB: Helth Check
-    p.gcutil_cmd('addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html')
+    p.gcutil_cmd('addhttphealthcheck {}-check80    --description="Cheking just port 80 for index.html" --request_path=/torino'.format(project_name))
+    p.gcutil_cmd('addhttphealthcheck index-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html'.format(project_name))
 
     # GCLB: Target Pools
     commasep_instances_list = ','.join(instance_names)

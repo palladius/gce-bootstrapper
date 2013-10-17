@@ -10,9 +10,10 @@ from subprocess import call
 import subprocess
 import os
 
-lib_ver_common  = '1.1.3'
+lib_ver_common  = '1.1.4'
 
 lib_ver_history = '''
+20131017 1.1.4 Refactoring firewall rules..
 20131016 1.1.3 Moving to storage. instead of host. 
                (TODO going to honor the "direct.$HOST.sh" file if it exists)
 20131015 1.1.2 Added 'original-vm-name' metadata
@@ -37,13 +38,20 @@ def gcutil_delinstances(project, names):
   gcutil_delinstance(project, ' '.join(name))
 
 
-def gcutil_addfirewall(p, name, description, additional_options):
+def gcutil_addfirewall(p, name, description=None, allowed=None, target_tags=None, additional_options=''):
   '''Adds a firewall rule, additional oprtions is just a string... 
   
-  sorry for my lazyness  
+  ie: 
+     p.addfirewall('foobar', 'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='mysqlable ' )
   ''' 
-  p.execute('''gcutil --project={} addfirewall {} --description='{}' {}'''.format(
-      p.id, name,  description, additional_options))
+
+  p.execute('''gcutil --project={pid} addfirewall {name} --description='{description}' --allowed='{allowed}' --target_tags="{target_tags}" {additional_options}'''.format(
+      pid=p.id, 
+      name=name,  
+      allowed=allowed,
+      description=description, 
+      target_tags=target_tags,
+      additional_options=additional_options))
 
 def gcutil_addinstance(project, name, description, 
   public_ip = False,

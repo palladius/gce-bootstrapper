@@ -1,6 +1,8 @@
 #!/bin/bash
 
-VER=1.2
+VER=1.3
+
+# 1.3 Added /torino
 
 apt-get install -y apache2
 
@@ -38,7 +40,9 @@ BgColor: $BGCOLOR (should just work)<br/>
 </html>
 EOF
 
-chmod 755 /var/www/index*html
+echo "I am gclb server: $HOSTNAME" > /var/www/torino
+
+chmod 755 /var/www/*html /var/www/torino
 
 touch /root/apache-installed-v$VER.touch
 

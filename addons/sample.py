@@ -19,9 +19,8 @@ def main():
   # Configuration
   #######################################
   names_desc_opts = [
-    ["debian", 'Test Debian', {'image': 'debian-7' } ],
-    ["centos", 'Test CenTO',  {'image': 'centos'  } ],
-    #["baz", 'Lots of baz around this topic', ],
+    ["debian", 'Test Debian', {'image': 'debian-7', 'tags': 'pingable,mysqlable', } ],
+    ["centos", 'Test CentOS', {'image': 'centos'  , 'tags': 'apache',         } ],
   ]
   conf = {
     'create_instances': True,
@@ -43,7 +42,8 @@ def main():
 
   if conf['create_firewalls']:
     # Creating a ruile which only applies to machines with tag "foobar". Imagine if it weas  Web/80 or MySQL/3306... and you can also open to just a few known IPs.
-    p.addfirewall('foobar', 'Allow Mysql from target foobar', '--allowed=tcp:3306,tcp:33060 --target_tags=foobar ' )
+    p.addfirewall('foobar', 'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='mysqlable ' )
+    p.addfirewall('ping',   'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='pingable  ' )
 
 
 if __name__ == "__main__":
