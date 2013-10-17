@@ -34,7 +34,7 @@ def main():
          # --port=<port>
 
   """
-  p = ProjectInitiator(sys.argv[0]) # needed also for conf :/
+  p = ProjectInitiator(sys.argv[0], run_pre_install=False) # needed also for conf :/
 
   #######################################
   # Configuration
@@ -73,7 +73,7 @@ def main():
     for hostname, description,color in names_and_desc:
       p.addinstance(hostname, description, 
         public_ip = public_ip,
-        tags=['affinity-ip', ], 
+        tags=['affinity-test', ], 
         metadata={
           'gclb-affinity': 'of some kind (depends on TP/FR)',
           'bgcolor': color, # this goes into the Apache code
@@ -83,27 +83,40 @@ def main():
   # Plays with firewalls
   if actions['add_firewall_rules']:
 
-    # GCLB: Target Pools
-    commasep_list = ','.join(instance_names)
-    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-no    --region {region} --description 'TP affinity: None'  --instances='{instances_list}' --session_affinity NONE".format(region=region, prefix=prefix,instances_list=commasep_list))
-    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-ip    --region {region} --description 'TP affinity: IP'    --instances='{instances_list}' --session_affinity CLIENT_IP".format(region=region, prefix=prefix,instances_list=commasep_list))
-    p.gcutil_cmd("addtargetpool {prefix}-tp-aff-proto --region {region} --description 'TP affinity: Proto' --instances='{instances_list}' --session_affinity CLIENT_IP_PROTO".format(region=region, prefix=prefix,instances_list=commasep_list))
-
-    # GCLB: Forwarding Rules
-    p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-no".format(prefix=prefix))
-    p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix),    target="{prefix}bootsy-tp-aff-ip".format(prefix=prefix))
-
-    p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(
-      instances=','.join(instance_names),
-      prefix=prefix,
-      )
-    )
+    # GCLB: Helth Check
     p.gcutil_cmd('addhttphealthcheck bootsy-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html')
 
+    # GCLB: Target Pools
+    commasep_instances_list = ','.join(instance_names)
+    health_checks=[ 'bootsy-check80', ]
+    affinities_and_nice_names = [
+      ['NONE',              'none',],
+      ['CLIENT_IP',         'ip'],
+      ['CLIENT_IP_PROTO',   'ipproto'],
+    ]
+    for affinity,aff_name in affinities_and_nice_names:
+      p.gcutil_cmd("addtargetpool {prefix}-tp-aff-{aff_name} --region {region} \
+                   --description 'TP with affinity: {affinity}'  --health_checks='{health_checks}' \
+                   --instances='{instances_list}' --session_affinity={affinity}".format(
+                      region=region, prefix=prefix,
+                      instances_list=commasep_instances_list,
+                      affinity=affinity,
+                      aff_name=aff_name,
+                      health_checks=','.join(health_checks)
+                      )
+      )
+
+    # GCLB: Explicitly adds instances to the TP (in case you need it)
+    #p.gcutil_cmd("addtargetpoolinstance {prefix}bootsy-aff-ip --instances {instances}".format(instances=','.join(instance_names), prefix=prefix))
+
+    # GCLB: Forwarding Rules
+    p.addforwardingrule('{prefix}bootsy-fr-aff-no'.format(prefix=prefix), target="{prefix}-tp-aff-no".format(prefix=prefix))
+    p.addforwardingrule('{prefix}bootsy-fr-aff-ip'.format(prefix=prefix), target="{prefix}-tp-aff-ip".format(prefix=prefix))
+
+
     # Firewalls
-    p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip' )
-    p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-ip --allowed_ip_sources={}'.format(
-      resticted_ips))
+    p.addfirewall('bootsy-http-all',        'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=affinity-test' )
+    p.addfirewall('bootsy-http-restricted', 'Allow HTTP from google IPs', '--allowed=tcp:80,tcp:443 --target_tags=www --allowed_ip_sources={}'.format(resticted_ips))
 
 
 if __name__ == "__main__":

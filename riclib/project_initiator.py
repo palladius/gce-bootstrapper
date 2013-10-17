@@ -16,12 +16,13 @@ import os.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from riclib import configurator
 from configurator import getConfigYaml
+from util import red, deb
 
 class ProjectInitiator:
   """This class is called when a Project has to be bootstrapped"""
   version = "1.1"
 
-  def __init__(self, filename, conf=None):
+  def __init__(self, filename, conf=None, run_pre_install=True, run_post_install=True):
     """Takes a filename which becomes the addon.
 
     Addon can be: "lamp", "load-balancer", ...
@@ -36,6 +37,10 @@ class ProjectInitiator:
     self.project_id = self.config['project_id']
     self.project    = self.config['project_id']
     self.id = self.config['project_id'] # alias for readability
+
+    # to decide if it launches pre_install and post_install
+    self.run_pre_install = run_pre_install
+    self.run_post_install = run_post_install
 
     # Add metadata
     common_metadata = [
@@ -54,12 +59,8 @@ class ProjectInitiator:
       self.config['metadata'][k] = v
 
     print "ProjectInitiator.new('%s') => '%s'" % (self.project, self.config)
-    self.pre_install()
-
-  def deb(self, s):
-    '''Colored Debug function'''
-    if len(s) > 0 and self.config['debug']:
-      print "\033[1;30m#PEB# {}\033[0m".format(s)
+    if self.run_pre_install:
+      self.pre_install()
 
   def config(self):
     return self.config
@@ -93,7 +94,7 @@ class ProjectInitiator:
     """
     if not region:
       region = self.default('region') # eg "europe-west1-a", slightly different from zone!
-    self.execute("gcutil --project={} addforwardingrule {} --region={} --target='{}' {}".format(self.project_id, rulename, region, target, extra))
+    self.gcutil_cmd("addforwardingrule {} --region={} --target='{}' {}".format(rulename, region, target, extra))
 
   def pre_install(self):
     '''This functions pushes into Google Storage all my per-machine init scripts.
@@ -148,24 +149,29 @@ class ProjectInitiator:
 
   def gcutil_cmd(self,subcommand):
     self.execute('gcutil --project {} {}'.format(self.id,subcommand))
+    ret = self.execute('echo ret=$? for: subcommand')
 
   def __repr__(self):
     return "ProjectInitiator('{}', id='{}')".format(self.name, self.project_id)
 
   def __del__(self):
     """Should be the destructor."""
-    self.deb("+ ProjectInitiator Destructor: {}".format(self))
-    self.post_install()
+    deb("+ ProjectInitiator Destructor: {}".format(self))
+    if self.post_install:
+      self.post_install()
 
   def execute(self, cmd, dryrun=None):
     """Wrapper to execute code.
     """
     if dryrun is None:
       dryrun = self.dryrun()
-    self.deb("Project Executing code (dryrun={}): '''{}'''".format(dryrun, cmd))
+    deb("Project Executing code (dryrun={}): '''{}'''".format(dryrun, cmd))
     if dryrun:
       print "#DRYRUN# Wont execute this: '''{}'''".format(cmd)
+      return "None(_DRYRUN_)"
     else:
         deb("PWARNING, executing: {}".format(cmd))
         ret = os.system(cmd)
         print "[PCMD] return={}".format(ret)
+        return ret
+    return None
