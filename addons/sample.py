@@ -11,9 +11,6 @@ from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
 
-def DoSomething():
-  print "nothing really"
-
 def main():
   #######################################
   # Configuration
@@ -23,8 +20,8 @@ def main():
     ["centos", 'Test CentOS', {'image': 'centos'  , 'tags': 'apache',         } ],
   ]
   conf = {
-    'create_instances': True,
-    'create_firewalls': False,
+    'create_instances': False,
+    'create_firewalls': True,
   }
 
   #######################################
@@ -42,9 +39,9 @@ def main():
 
   if conf['create_firewalls']:
     # Creating a ruile which only applies to machines with tag "foobar". Imagine if it weas  Web/80 or MySQL/3306... and you can also open to just a few known IPs.
-    p.addfirewall('foobar', 'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='mysqlable ' )
-    p.addfirewall('ping',   'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='pingable  ' )
-
+    p.addfirewall('allow-mysql', 'Allow Mysql from VMs targeted mysqlable',  allowed='tcp:3306,udp:3306',        target_tags='mysqlable', )
+    p.addfirewall('allow-web',   'Allow Web traffic from webbable machines', allowed='tcp:80,tcp:443,udp:12345', target_tags='webbable',  )
+    p.addfirewall('allow-icmp',  'Allow ICMP for only pingable machines',    allowed='icmp', target_tags='pingable',  )
 
 if __name__ == "__main__":
     main()

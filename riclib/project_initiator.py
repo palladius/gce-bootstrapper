@@ -76,16 +76,22 @@ class ProjectInitiator:
     """
     gcutil_addinstance(self, name, description, **kwargs)
 
-  def addfirewall(self, name, description, args):
-    gcutil_addfirewall(self, name, description, args)
+
+  def addfirewall(self, name, description=None, allowed=None, target_tags=None, additional_options=''):
+    '''Adds a firewall rule, additional oprtions is just a string... 
+    
+    ie: 
+       p.addfirewall('foobar', 'Allow Mysql from target foobar', allowed='tcp:3306,tcp:33060', target_tags='mysqlable ' )
+    ''' 
+    return self.gcutil_cmd('''addfirewall {name} --description='{description}' --allowed='{allowed}' --target_tags="{target_tags}" {additional_options}'''.format(
+              name=name,  
+              allowed=allowed,
+              description=description, 
+              target_tags=target_tags,
+              additional_options=additional_options))
 
   def delinstances(self, arr_of_instance_names):
     gcutil_delinstances(self, arr_of_instance_names)
-
-  # def setcommoninstancemetadata(self,arr_keys_values):
-  #   """Gets an array of metadata, puts them into self.metadata."""
-  #   for 
-  #   gcutil_setcommoninstancemetadata(self, arr_keys_values)
 
   def addforwardingrule(self,rulename, target, region=None, extra=''):
     """Creates a forwarding rule.
