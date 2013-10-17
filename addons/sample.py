@@ -19,7 +19,7 @@ def main():
   # Configuration
   #######################################
   names_desc_opts = [
-    ["debian", 'Test Debian', {'image': 'debian7' } ],
+    ["debian", 'Test Debian', {'image': 'debian-7' } ],
     ["centos", 'Test CenTO',  {'image': 'centos'  } ],
     #["baz", 'Lots of baz around this topic', ],
   ]

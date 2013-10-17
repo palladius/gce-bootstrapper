@@ -9,3 +9,6 @@ delete-test-instances:
 
 gclb:
 	./bootstrap.py gclb | tee out/out-`date +%s`.out
+
+sample:
+	./bootstrap.py sample | tee out/out-`date +%s`.out
