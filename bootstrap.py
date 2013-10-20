@@ -1,11 +1,10 @@
 #!/usr/bin/python
 
-# This program aims to start a project within the possible projects described in
-# projects/*.addon
+"""
+This program aims to start a project within the possible projects described in
+projects/*.addon
+"""
 
-script_ver = '0.9.4'
-
-# builtin
 import sys 
 import os
 import re
@@ -15,6 +14,7 @@ import importlib
 import riclib
 from riclib.util import deb, debug_app, yellow
 
+script_ver = '0.9.4'
 
 defaults = {
   'addon_dir':  './addons/',
@@ -25,10 +25,8 @@ def init():
   '''Initialization.'''
   sys.path.append(os.path.abspath(defaults['addon_dir']))
   sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-  #sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'addons')))
-  #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'addons')))
-  print "sys.path: ", sys.path
-
+  #print "sys.path: ", sys.path
+  deb("sys.version: {v}".format(v=sys.version))
 
 
 def valid_projects(addons_dir=defaults['addon_dir']):
@@ -94,7 +92,7 @@ def bootstrap_project(addon, config, addons_dir=defaults['addon_dir']):
 
 def main():
   init()
-  deb("ARGV: {}".format(sys.argv))
+  print("ARGV: {argv}".format(argv=sys.argv))
   if len(sys.argv) < 2:
     usage()
   config = riclib.configurator.getConfigYaml(defaults['yaml_file'])

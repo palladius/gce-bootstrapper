@@ -7,8 +7,8 @@ from riclib.gcutil_wrapper import *
 from riclib.project_initiator import *
 
 
-cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-print "cmd_folder: ", cmd_folder
+#cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+#print "cmd_folder: ", cmd_folder
 
 #config = riclib.config.getConfigYaml(defaults['yaml_file'])
 
@@ -38,7 +38,6 @@ def main():
 
   # Adding disks
   gcutil_adddisk(project, 'd2', )
-  #gcutil_adddisk(project, 'd1', zone = "some other zone")
 
   # Adding instances
   gcutil_addinstance(project, "nagios-ea", "Nagios zone my_zone_a",  public_ip = True, network=net, zone = my_zone_a, disk = 'nagios-ea', tags=['lampy'])
@@ -52,4 +51,5 @@ def main():
 
   common_post(project)
 
-main()
+if __name__ == "__main__":
+  main()

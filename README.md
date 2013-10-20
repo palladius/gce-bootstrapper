@@ -16,10 +16,19 @@ Build your own project
 
 To build your own application, please follow the structure of my projects like this:
 
-    export PROJ=foobar
+	export PROJ=foobar
 	mkdir projects/$PROJ.d/
 	touch projects/sample.py projects/$PROJ.py
 
+Install
+-------
+
+To get the code up and running, you might need to install the following python packages:
+
+	Python packages: See `make install`
+	`gcutil` package
+
+See `Makefile` for this.
 
 Code
 ----

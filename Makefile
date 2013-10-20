@@ -12,3 +12,6 @@ gclb:
 
 sample:
 	./bootstrap.py sample | tee out/out-sample-`date +%s`.out
+
+install:
+	sudo easy_install importlib pyyaml

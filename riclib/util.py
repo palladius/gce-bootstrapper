@@ -17,13 +17,13 @@ def debug_app():
 ############################################
 # String stuff
 def yellow(str):
-  return "\033[1;33m{}\033[0m".format(str)
+  return "\033[1;33m{s}\033[0m".format(s=str)
 def red(str):
-  return "\033[1;31m{}\033[0m".format(str)
+  return "\033[1;31m{s}\033[0m".format(s=str)
 def green(str):
-  return "\033[1;32m{}\033[0m".format(str)
+  return "\033[1;32m{s}\033[0m".format(s=str)
 def gray(str):
-  return "\033[1;30m{}\033[0m".format(str)
+  return "\033[1;30m{s}\033[0m".format(s=str)
 
 def pyellow(str):
   print yellow(str)
@@ -49,7 +49,7 @@ class DebugSingleton(object):
 
     def deb(self, s):
         if len(s) > 0 and self._debug:
-          print "#DEB# {}".format(s)
+          print "#DEB# {str}".format(str=s)
 
 # call initializer
 DebugSingleton()
