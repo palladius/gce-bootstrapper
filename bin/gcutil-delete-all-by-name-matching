@@ -5,20 +5,32 @@ VER=1.0
 # TODO: disable Region warning
 
 DFLT_PROJ="google.com:biglamp"
-
 # more a matching name than tag
 TAG=${1:-test}
 PROJ=${2:-$DFLT_PROJ}
+GCUTIL="gcutil --project ${PROJ}"
+
+
+### MAIN
 
 echo "Usage: $0 <TAG> [<PROJECT_ID>]"
 echo
-echo "Deleting all entities from $PROJ with tag='$TAG': ANY/CTRL-C"
+echo "Deleting all entities from $PROJ with tag='$TAG': yes/no"
 read ANY
 
-GCUTIL="gcutil --project ${PROJ}"
+if echo $ANY |fgrep yes ; then
+    echo OK lets oproceed then
+else
+    echo "Interrupting (you said '$ANY', not yes)"
+    exit 1
+fi
 
 rosso Deleting Instances:
 $GCUTIL listinstances --format names | grep "$TAG" | sed -e 's:/: :g' | awk '{print $3}' | sort| xargs $GCUTIL deleteinstance -f
+
+
+rosso Deleting Healthchecks:
+$GCUTIL listhttphealthchecks --format names | grep "$TAG" | xargs $GCUTIL deletehttphealthcheck -f
 
 rosso Delete ForwardingRules:
 $GCUTIL listforwardingrules --format csv | egrep -v "NO_RESULTS_ON_PAGE|code,message|name,description" | fgrep ',' | cut -f 1 -d, | grep "$TAG" | sort| uniq | xargs $GCUTIL deleteforwardingrule -f
