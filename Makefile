@@ -1,5 +1,7 @@
 
-PROJECT_ID = 613126411804
+# PROJECT_ID = 613126411804 # biglamp
+PROJECT_ID = ric-cccwiki
+
 
 clean:
 	rm *.pyc */*.pyc

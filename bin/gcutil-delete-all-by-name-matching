@@ -12,14 +12,19 @@ PROJ=${2:-$DFLT_PROJ}
 
 echo "Usage: $0 <TAG> [<PROJECT_ID>]"
 echo
-echo "Deleting all entities from $PROJECT with tag='$TAG': ANY/CTRL-C"
+echo "Deleting all entities from $PROJ with tag='$TAG': ANY/CTRL-C"
 read ANY
 
 GCUTIL="gcutil --project ${PROJ}"
 
 rosso Deleting Instances:
-$GCUTIL listinstances --format names | grep "$TAG" | sed -e 's:/: :g' | awk '{print $3}' | sort| xargs $GCUTIL deleteinstance -f >/dev/null
+$GCUTIL listinstances --format names | grep "$TAG" | sed -e 's:/: :g' | awk '{print $3}' | sort| xargs $GCUTIL deleteinstance -f
+
+rosso Delete ForwardingRules:
+$GCUTIL listforwardingrules --format csv | egrep -v "NO_RESULTS_ON_PAGE|code,message|name,description" | fgrep ',' | cut -f 1 -d, | grep "$TAG" | sort| uniq | xargs $GCUTIL deleteforwardingrule -f
 
 rosso Deleting TargetPools:
 $GCUTIL listtargetpools --format csv | fgrep ',' | cut -f 1 -d',' | grep "$TAG" | sort|uniq | xargs $GCUTIL deletetargetpool -f
 
+#rosso Deleting Snaphosts: TODO # i have none to test :)
+#$GCUTIL listsnapshots --format csv | fgrep ',' | cut -f 1 -d',' | grep "$TAG" 
