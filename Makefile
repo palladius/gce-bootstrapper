@@ -5,10 +5,7 @@ clean:
 	rm *.pyc */*.pyc
 
 delete-test-instances:
-	echo Deleting Test Projects:
-	gcutil --project=$(PROJECT_ID) listinstances --format names | grep test | sed -e 's:/: :g' | cut -f 6 -d' ' | sort|  xargs echo Cut and paste this: gcutil --project $(PROJECT_ID) deleteinstance -f
-	echo Deleting Test Target Pools:
-	echo TODO
+	bin/gcutil-delete-all-by-name-matching "test-" "$(PROJECT_ID)"
 
 gclb:
 	./bootstrap.py gclb | tee out/out-gclb-`date +%s`.out

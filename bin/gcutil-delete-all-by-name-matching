@@ -1,0 +1,25 @@
+#!/bin/bash
+
+VER=1.0
+
+# TODO: disable Region warning
+
+DFLT_PROJ="google.com:biglamp"
+
+# more a matching name than tag
+TAG=${1:-test}
+PROJ=${2:-$DFLT_PROJ}
+
+echo "Usage: $0 <TAG> [<PROJECT_ID>]"
+echo
+echo "Deleting all entities from $PROJECT with tag='$TAG': ANY/CTRL-C"
+read ANY
+
+GCUTIL="gcutil --project ${PROJ}"
+
+rosso Deleting Instances:
+$GCUTIL listinstances --format names | grep "$TAG" | sed -e 's:/: :g' | awk '{print $3}' | sort| xargs $GCUTIL deleteinstance -f >/dev/null
+
+rosso Deleting TargetPools:
+$GCUTIL listtargetpools --format csv | fgrep ',' | cut -f 1 -d',' | grep "$TAG" | sort|uniq | xargs $GCUTIL deletetargetpool -f
+
