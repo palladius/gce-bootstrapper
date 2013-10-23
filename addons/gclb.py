@@ -60,8 +60,8 @@ def main():
   #######################################
   if actions['cleanup']:
     # Cleanup target pools. Pity we don't have a listtargetpools with --format names :("
-    p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(p.project_id)) 
-
+    p.gcutil_cmd("""listtargetpools --filter "name eq test-lun.*bootsy.*" | fgrep "| test-" | cut -f 2 | xargs echo gcutil --project {project_id} deletetargetpool -f""".format(
+      project_id=p.project_id))
 
   # Creates machines
   if actions['add_machines']:
@@ -78,12 +78,12 @@ def main():
   # Plays with firewalls
   if actions['add_loadbalancer_rules']:
     # GCLB: Helth Check
-    p.gcutil_cmd('addhttphealthcheck {}-check80    --description="Cheking just port 80 for index.html" --request_path=/torino'.format(project_name))
-    p.gcutil_cmd('addhttphealthcheck index-check80 --description="Cheking just port 80 for index.html" --request_path=/index.html'.format(project_name))
-
+    p.gcutil_cmd('addhttphealthcheck basic-check  --description="Simplest ever"') # checks for port 80
+    p.gcutil_cmd('addhttphealthcheck slash-index2 --description="Cheking just port 80 for index2.html" --request_path=/index2.html')
+    
     # GCLB: Target Pools
     commasep_instances_list = ','.join(instance_names)
-    health_checks=[ 'bootsy-check80', ]
+    health_checks=[ 'basic-check', ]
     for affinity,aff_name in affinities_and_nice_names:
       targetpool = "{prefix}tp-aff{aff_name}".format(prefix=prefix, aff_name=aff_name)
       # GCLB: Adds 3 Target Pools, one for every
