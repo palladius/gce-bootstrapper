@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER=1.0
+VER=1.1
 
 # TODO: disable Region warning
 
@@ -24,6 +24,9 @@ else
     echo "Interrupting (you said '$ANY', not yes)"
     exit 1
 fi
+
+rosso deleting based on filter on name:
+echo $GCUTIL listinstances --filter "name eq '.*$TAG.*'" --format names
 
 rosso Deleting Instances:
 $GCUTIL listinstances --format names | grep "$TAG" | sed -e 's:/: :g' | awk '{print $3}' | sort| xargs $GCUTIL deleteinstance -f
