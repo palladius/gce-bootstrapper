@@ -1,6 +1,6 @@
 # host : webserver1/2/3.sh
 
-BGCOLOR=$(curl http://metadata/0.1/meta-data/attributes/bgcolor)
+BGCOLOR="$(curl http://metadata/0.1/meta-data/attributes/bgcolor)"
 VER='1.1'
 
 apt-get install -y apache2
@@ -13,6 +13,7 @@ cat > /var/www/index.html <<EOF
 
   <p>Click on <a href='/index.html'  >index.html</a>.  </p>
   <p>Click on <a href='/index2.html' >index2.html</a>. </p>
+
  </body>
 </html>
 EOF

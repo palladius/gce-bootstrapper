@@ -1,8 +1,9 @@
 #!/bin/bash
 
-VER=1.2
+VER=1.3
 
-PROJ="google.com:biglamp"
+#PROJ="ric-cccwiki"
+PROJ="134140879415"
 REGION='europe-west1'
 ZONE0='europe-west1-a'
 ZONE1='europe-west1-b'
@@ -26,11 +27,10 @@ function _gcutil_add() {
       --zone $ZONE \
       --tags gclb,test,deleteme,webbable \
       --machine_type n1-standard-1 \
-      --metadata bgcolor="$COLOR" \
-      --metadata provisioning_script="$0 v$VER" \
+      --metadata bgcolor:"$COLOR" \
       --nopersistent_boot_disk \
       --image debian-7 \
-      --metadata_from_file=startup-script:gclb.d/direct.provisioner-webserver1.sh &
+      --metadata_from_file=startup-script:gclb.d/direct.provisioner-webserver1.sh
 
 }
 

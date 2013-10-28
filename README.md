@@ -9,25 +9,21 @@ Try this:
 
     cp config.yml.dist config.yml
     vi config.yml                       # Edit with your project configuration
-    ./bootstrap.py  <PROJECT_NAME>      # (e.g. "load-balancer")
+    ./bootstrap.py  <ADDON_NAME>        # (e.g. "load-balancer")
 
 Build your own project
 ----------------------
 
 To build your own application, please follow the structure of my projects like this:
 
-	export PROJ=foobar
-	mkdir projects/$PROJ.d/
-	touch projects/sample.py projects/$PROJ.py
+	export ADDON=foobar
+	mkdir projects/$ADDON.d/
+	touch projects/sample.py projects/$ADDON.py
 
 Install
 -------
 
-To get the code up and running, you might need to install the following python packages:
-
-	Python packages: See `make install`
-	`gcutil` package
-
+To get the code up and running, you might need to install the following python packages.
 See `Makefile` for this.
 
 Code
